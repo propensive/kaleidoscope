@@ -10,7 +10,7 @@ import kaleidoscope._
 
 object Tests extends TestApp {
 
-  def tests(): Unit = {
+  def tests(): Unit = for(i <- 1 to 100000) {
     test("simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)
@@ -19,6 +19,10 @@ object Tests extends TestApp {
       "hello world" match { case r"(hello world)" => 2 }
     }.assert(_ == 2)
 
+    test("extract one word") {
+      "hello world" match { case r"$first@(hello) world" => first }
+    }.assert(_ == "hello")
+    
     test("extract words") {
       "hello world" match { case r"$first@(hello) $second@(world)" => List(first, second) }
     }.assert(_ == List("hello", "world"))
