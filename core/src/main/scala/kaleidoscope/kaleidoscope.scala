@@ -17,16 +17,18 @@ package kaleidoscope
 import language.experimental.macros
 import reflect._, reflect.macros._
 import java.util.regex._
-import scala.collection.mutable.HashMap
+import java.util.concurrent.ConcurrentHashMap
 
-object Macros {
-  def unapply(c: whitebox.Context)(pattern: c.Tree): c.Tree = {
+private[kaleidoscope] object Macros {
+
+  /** macro implementation to generate the extractor AST for the given pattern */
+  def unapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
-    val q"$_($_(..$partTrees)).r.$method[..$_](..$args)" = c.macroApplication // "
+    val q"$_($_(..$partTrees)).r.$method[..$_](..$args)" = c.macroApplication
     val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
     val positions = partTrees.map { case lit@Literal(_) => lit.pos }
-    
+   
     def parsePart(part: String): Int = part.foldLeft((false, 0)) {
       case ((esc, cnt), '(') => if(esc) (false, cnt) else (false, cnt + 1)
       case ((esc, cnt), '\\') => (!esc, cnt)
@@ -45,20 +47,23 @@ object Macros {
     
     val notMatch = if(parts.length == 1) q"false" else q"_root_.scala.None"
     val groupCalls = (1 until groups.length).map { p => q"m.group(${groups(p)})" }
+    
     def isMatch = if(parts.length == 1) q"true" else q"_root_.scala.Some((..$groupCalls))"
 
     val pattern = (parts.head :: parts.tail.map(_.tail)).mkString
     
+    def findPosition(xs: List[String], err: Int, str: Int): Position = {
+      xs match {
+        case Nil => positions(str - 1).withPoint(positions(str - 1).point + err)
+        case head :: tail =>
+          if(head.length < err) findPosition(tail, err - head.length + 1, str + 1)
+          else findPosition(Nil, err, str + 1)
+      }
+    }
+    
     try Pattern.compile(pattern) catch {
       case e: PatternSyntaxException =>
-        def find(xs: List[String], err: Int, str: Int): Position = {
-          xs match {
-            case Nil => positions(str - 1).withPoint(positions(str - 1).point + err)
-            case head :: tail => if(head.length < err) find(tail, err - head.length + 1, str + 1) else find(Nil, err, str + 1)
-          }
-        }
-        
-        c.abort(find(parts, e.getIndex, 0), s"kaleidoscope: ${e.getDescription} in pattern")
+        c.abort(findPosition(parts, e.getIndex, 0), s"kaleidoscope: ${e.getDescription} in pattern")
     }
 
     q"""new { def unapply(input: _root_.java.lang.String): $returnType = {
@@ -70,12 +75,25 @@ object Macros {
 }
 
 object `package` {
+  /** provides the `r` extractor on strings for creating regular expression pattern matches */
   implicit class RegexStringContext(sc: StringContext) {
-    object r { def unapply(pattern: String): Any = macro Macros.unapply }
+    object r {
+      /** returns an unapply extractor for the pattern described by the string context */
+      def unapply(scrutinee: String): Any = macro Macros.unapply
+    }
   }
 }
 
 object Kaleidoscope {
-  private[this] val cache: HashMap[String, Pattern] = new HashMap()
-  def pattern(p: String): Pattern = synchronized(cache.getOrElseUpdate(p, Pattern.compile(p)))
+  private[this] val cache: ConcurrentHashMap[String, Pattern] = new ConcurrentHashMap()
+ 
+  /** provides access to the cached compiled `Pattern` object for the given string */
+  def pattern(p: String): Pattern = {
+    val result = cache.get(p)
+    if(result == null) {
+      val newPattern = Pattern.compile(p)
+      cache.put(p, newPattern)
+      newPattern
+    } else result
+  }
 }
