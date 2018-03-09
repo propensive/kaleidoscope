@@ -42,14 +42,6 @@ private[kaleidoscope] object Macros {
     
     val groups = parts.map(parsePart).inits.map(_.sum).to[List].reverse.tail
 
-    val returnType = if(parts.length == 1) tq"_root_.scala.Boolean"
-        else tq"_root_.scala.Option[(..${List.fill(parts.length - 1)(tq"_root_.java.lang.String")})]"
-    
-    val notMatch = if(parts.length == 1) q"false" else q"_root_.scala.None"
-    val groupCalls = (1 until groups.length).map { p => q"m.group(${groups(p)})" }
-    
-    def isMatch = if(parts.length == 1) q"true" else q"_root_.scala.Some((..$groupCalls))"
-
     val pattern = (parts.head :: parts.tail.map(_.tail)).mkString
     
     def findPosition(xs: List[String], err: Int, str: Int): Position = {
@@ -61,16 +53,42 @@ private[kaleidoscope] object Macros {
       }
     }
     
+    val groupCalls = (1 until groups.length).map { idx =>
+      val term = TermName("_"+idx)
+      q"""def $term: _root_.java.lang.String = matcher.group(${groups(idx)})"""
+    }
+
     try Pattern.compile(pattern) catch {
       case e: PatternSyntaxException =>
         c.abort(findPosition(parts, e.getIndex, 0), s"kaleidoscope: ${e.getDescription} in pattern")
     }
 
-    q"""new { def unapply(input: _root_.java.lang.String): $returnType = {
+    def getDef = groups.length match {
+      case 2 => q"def get = matcher.group(${groups(1)})"
+      case _ => q"def get = this"
+    }
+
+    if(groups.length == 1) q"""new {
+      def unapply(input: _root_.java.lang.String): _root_.scala.Boolean = {
         val m = _root_.kaleidoscope.Kaleidoscope.pattern($pattern).matcher(input)
-        if(m.matches) ${isMatch} else $notMatch
-      } }.unapply(..$args)
-    """
+        m.matches()
+      }
+    }.unapply(..$args)"""
+    else q"""new {
+      class Match(matcher: _root_.java.util.regex.Matcher) {
+        
+        def isEmpty = !matcher.matches()
+        $getDef
+        ..$groupCalls
+      }
+      
+      def unapply(input: _root_.java.lang.String): Match = {
+        val matcher: _root_.java.util.regex.Matcher =
+          _root_.kaleidoscope.Kaleidoscope.pattern($pattern).matcher(input)
+        
+        new Match(matcher)
+      }
+    }.unapply(..$args)"""
   }
 }
 
