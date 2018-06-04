@@ -1,6 +1,6 @@
 package adversaria.tests
 
-import estrapade.{TestApp, test}
+import probation.{TestApp, test}
 import contextual.data.scalac._
 import contextual.data.fqt._
 import annotation.StaticAnnotation
@@ -47,5 +47,22 @@ object Tests extends TestApp {
       val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" = "test@example.com"
       List(prefix, domain, tld)
     }.assert(_ == List("test", "example", "com"))
+    
+    test("BigDecimal match") {
+      BigDecimal("3.14159") match { case d"3.14159" => "pi"; case _ => "not pi" }
+    }.assert(_ == "pi")
+    
+    test("BigDecimal non-match") {
+      BigDecimal("1.0") match { case d"3.14159" => "pi"; case _ => "not pi" }
+    }.assert(_ == "not pi")
+    
+    test("BigDecimal static failure") {
+      scalac"""BigDecimal("3.14159") match { case d"3x14159" => true }"""
+    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid BigDecimal"))
+    
+    test("BigDecimal non-literal extraction failure") {
+      scalac"""BigDecimal("3.14159") match { case d"3$${x}14159" => x }"""
+    }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
+    
   }
 }

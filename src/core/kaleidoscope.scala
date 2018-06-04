@@ -22,7 +22,27 @@ import java.util.concurrent.ConcurrentHashMap
 private[kaleidoscope] object Macros {
 
   /** macro implementation to generate the extractor AST for the given pattern */
-  def unapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
+  def decimalUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
+    import c.universe._
+
+    val q"$_($_(..$partTrees)).d.$method[..$_](..$args)" = c.macroApplication
+    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
+
+    if(parts.length > 1) c.abort(c.enclosingPosition, "kaleidoscope: only literal extractions are permitted")
+    try BigDecimal(parts.head)
+    catch { case e: NumberFormatException =>
+      c.abort(c.enclosingPosition, "kaleidoscope: this is not a valid BigDecimal")
+    }
+
+    q"""new {
+      def unapply(input: _root_.scala.math.BigDecimal): _root_.scala.Boolean = {
+        input == BigDecimal(${parts.head})
+      }
+    }.unapply(..$args)"""
+  }
+  
+  /** macro implementation to generate the extractor AST for the given pattern */
+  def stringUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
     val q"$_($_(..$partTrees)).r.$method[..$_](..$args)" = c.macroApplication
@@ -94,10 +114,14 @@ private[kaleidoscope] object Macros {
 
 object `package` {
   /** provides the `r` extractor on strings for creating regular expression pattern matches */
-  implicit class RegexStringContext(sc: StringContext) {
+  implicit class KaleidoscopeContext(sc: StringContext) {
     object r {
       /** returns an unapply extractor for the pattern described by the string context */
-      def unapply(scrutinee: String): Any = macro Macros.unapply
+      def unapply(scrutinee: String): Any = macro Macros.stringUnapply
+    }
+
+    object d {
+      def unapply(scrutinee: BigDecimal): Any = macro Macros.decimalUnapply
     }
   }
 }
