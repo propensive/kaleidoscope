@@ -64,5 +64,21 @@ object Tests extends TestApp {
       scalac"""BigDecimal("3.14159") match { case d"3$${x}14159" => x }"""
     }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
     
+    test("BigInt match") {
+      BigInt("314159") match { case i"314159" => "yes"; case _ => "no" }
+    }.assert(_ == "yes")
+    
+    test("BigInt non-match") {
+      BigInt("10") match { case i"314159" => "yes"; case _ => "no" }
+    }.assert(_ == "no")
+    
+    test("BigInt static failure") {
+      scalac"""BigInt("1") match { case i"xyz" => true }"""
+    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid BigInt"))
+    
+    test("BigInt non-literal extraction failure") {
+      scalac"""BigInt("314159") match { case i"3$${x}14159" => x }"""
+    }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
+    
   }
 }

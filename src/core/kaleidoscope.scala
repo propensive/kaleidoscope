@@ -21,7 +21,25 @@ import java.util.concurrent.ConcurrentHashMap
 
 private[kaleidoscope] object Macros {
 
-  /** macro implementation to generate the extractor AST for the given pattern */
+  def intUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
+    import c.universe._
+
+    val q"$_($_(..$partTrees)).i.$method[..$_](..$args)" = c.macroApplication
+    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
+
+    if(parts.length > 1) c.abort(c.enclosingPosition, "kaleidoscope: only literal extractions are permitted")
+    try BigInt(parts.head)
+    catch { case e: NumberFormatException =>
+      c.abort(c.enclosingPosition, "kaleidoscope: this is not a valid BigInt")
+    }
+
+    q"""new {
+      def unapply(input: _root_.scala.math.BigInt): _root_.scala.Boolean = {
+        input == BigInt(${parts.head})
+      }
+    }.unapply(..$args)"""
+  }
+  
   def decimalUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
@@ -122,6 +140,10 @@ object `package` {
 
     object d {
       def unapply(scrutinee: BigDecimal): Any = macro Macros.decimalUnapply
+    }
+    
+    object i {
+      def unapply(scrutinee: BigInt): Any = macro Macros.intUnapply
     }
   }
 }
