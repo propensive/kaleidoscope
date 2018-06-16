@@ -21,16 +21,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 private[kaleidoscope] object Macros {
 
+  private def abort[Ctx <: whitebox.Context](c: Ctx)(msg: String): Nothing =
+    c.abort(c.enclosingPosition, s"kaleidoscope: $msg")
+
   def intUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
-    val q"$_($_(..$partTrees)).i.$method[..$_](..$args)" = c.macroApplication
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
     val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
 
-    if(parts.length > 1) c.abort(c.enclosingPosition, "kaleidoscope: only literal extractions are permitted")
+    if(parts.length > 1) abort(c)("only literal extractions are permitted")
     try BigInt(parts.head)
-    catch { case e: NumberFormatException =>
-      c.abort(c.enclosingPosition, "kaleidoscope: this is not a valid BigInt")
+    catch { case e: NumberFormatException => abort(c)("this is not a valid BigInt")
     }
 
     q"""new {
@@ -43,13 +45,13 @@ private[kaleidoscope] object Macros {
   def decimalUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
-    val q"$_($_(..$partTrees)).d.$method[..$_](..$args)" = c.macroApplication
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
     val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
 
-    if(parts.length > 1) c.abort(c.enclosingPosition, "kaleidoscope: only literal extractions are permitted")
+    if(parts.length > 1) abort(c)("only literal extractions are permitted")
     try BigDecimal(parts.head)
     catch { case e: NumberFormatException =>
-      c.abort(c.enclosingPosition, "kaleidoscope: this is not a valid BigDecimal")
+      abort(c)("this is not a valid BigDecimal")
     }
 
     q"""new {
@@ -63,7 +65,7 @@ private[kaleidoscope] object Macros {
   def stringUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
     import c.universe._
 
-    val q"$_($_(..$partTrees)).r.$method[..$_](..$args)" = c.macroApplication
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
     val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
     val positions = partTrees.map { case lit@Literal(_) => lit.pos }
    
@@ -75,7 +77,7 @@ private[kaleidoscope] object Macros {
 
     parts.tail.foreach { p =>
       if(p.length < 2 || p.head != '@' || p(1) != '(')
-        c.abort(c.enclosingPosition, "kaleidoscope: variable must be bound to a capturing group")
+        abort(c)("variable must be bound to a capturing group")
     }
     
     val groups = parts.map(parsePart).inits.map(_.sum).to[List].reverse.tail
@@ -134,6 +136,11 @@ object `package` {
   /** provides the `r` extractor on strings for creating regular expression pattern matches */
   implicit class KaleidoscopeContext(sc: StringContext) {
     object r {
+      /** returns an unapply extractor for the pattern described by the string context */
+      def unapply(scrutinee: String): Any = macro Macros.stringUnapply
+    }
+
+    object regex {
       /** returns an unapply extractor for the pattern described by the string context */
       def unapply(scrutinee: String): Any = macro Macros.stringUnapply
     }
