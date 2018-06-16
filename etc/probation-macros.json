@@ -1,0 +1,56 @@
+{
+    "version" : "1.0.0",
+    "project" : {
+        "name" : "probation/macros",
+        "directory" : "$PWD",
+        "sources" : [
+            "$PWD/probation/src/macros"
+        ],
+        "dependencies" : ["magnolia/core"],
+        "classpath" : [
+            "$PWD/scala-2.12.6/lib/scala-library.jar", "$PWD/scala-2.12.6/lib/scala-xml_2.12-1.0.6.jar", "$PWD/scala-2.12.6/lib/scala-compiler.jar", "$PWD/scala-2.12.6/lib/scala-reflect.jar", "$PWD/bin/"
+        ],
+        "classpathOptions" : {
+            "bootLibrary" : true,
+            "compiler" : false,
+            "extra" : false,
+            "autoBoot" : true,
+            "filterLibrary" : true
+        },
+        "compileOptions" : {
+            "order" : "mixed"
+        },
+        "out" : "$PWD/bin",
+        "classesDir" : "$PWD/bin",
+        "scala" : {
+            "organization" : "org.scala-lang",
+            "name" : "scala-compiler",
+            "version" : "2.12.6",
+            "options" : [
+              "-unchecked", "-deprecation", "-Xexperimental", "-feature", "-Ywarn-value-discard", "-Ywarn-dead-code", "-Ywarn-nullary-unit", "-Ywarn-numeric-widen", "-Ywarn-inaccessible", "-Ywarn-adapted-args"
+            ],
+            "jars" : [
+                "$PWD/scala-2.12.6/lib/scala-library.jar", "$PWD/scala-2.12.6/lib/scala-xml_2.12-1.0.6.jar", "$PWD/scala-2.12.6/lib/scala-compiler.jar", "$PWD/scala-2.12.6/lib/scala-reflect.jar"
+            ]
+        },
+        "jvm" : {
+            "home" : "$JAVA_HOME",
+            "options" : [
+            ]
+        },
+        "java" : {
+            "options" : [
+            ]
+        },
+        "test" : {
+            "frameworks" : [
+            ],
+            "options" : {
+                "excludes" : [
+                ],
+                "arguments" : [
+                ]
+            }
+        }
+    }
+}
