@@ -23,8 +23,8 @@ To compile Kaleidoscope, run,
 ```
 make compile
 ```
-The first time you run this, it will download source dependencies, generate
-configuration files for bloop first.
+The first time you run this, it will download source dependencies and generate
+configuration files for bloop.
 
 To run the tests, run,
 ```
