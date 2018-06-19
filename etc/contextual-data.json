@@ -10,18 +10,9 @@
         "classpath" : [
             "$PWD/scala-2.12.6/lib/scala-library.jar", "$PWD/scala-2.12.6/lib/scala-xml_2.12-1.0.6.jar", "$PWD/scala-2.12.6/lib/scala-compiler.jar", "$PWD/scala-2.12.6/lib/scala-reflect.jar", "$PWD/bin/"
         ],
-        "classpathOptions" : {
-            "bootLibrary" : true,
-            "compiler" : false,
-            "extra" : false,
-            "autoBoot" : true,
-            "filterLibrary" : true
-        },
-        "compileOptions" : {
-            "order" : "mixed"
-        },
         "out" : "$PWD/bin",
-        "classesDir" : "$PWD/bin",
+        "classesDir" : "$PWD/bin/classes",
+        "analysisOut" : "$PWD/bin/kaleidoscope-analysis.bin",
         "scala" : {
             "organization" : "org.scala-lang",
             "name" : "scala-compiler",
@@ -31,11 +22,6 @@
             ],
             "jars" : [
                 "$PWD/scala-2.12.6/lib/scala-library.jar", "$PWD/scala-2.12.6/lib/scala-xml_2.12-1.0.6.jar", "$PWD/scala-2.12.6/lib/scala-compiler.jar", "$PWD/scala-2.12.6/lib/scala-reflect.jar"
-            ]
-        },
-        "jvm" : {
-            "home" : "$JAVA_HOME",
-            "options" : [
             ]
         },
         "java" : {
@@ -49,6 +35,30 @@
                 "excludes" : [
                 ],
                 "arguments" : [
+                ]
+            }
+        },
+        "compileSetup" : {
+            "order" : "mixed",
+            "addLibraryToBootClasspath" : true,
+            "addCompilerToClasspath" : false,
+            "addExtraJarsToClasspath" : false,
+            "manageBootClasspath" : true,
+            "filterLibraryFromClasspath" : true
+        },
+        "resolution" : {
+            "modules": []
+        },
+        "sbt" : {
+            "sbtVersion" : "",
+            "autoImports" : [
+            ]
+        },
+        "platform" : {
+            "name" : "jvm",
+            "config" : {
+                "home" : "$JAVA_HOME",
+                "options" : [
                 ]
             }
         }
