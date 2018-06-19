@@ -1,6 +1,6 @@
-PROJECT="kaleidoscope/core"
-TESTS="kaleidoscope/test"
-SCALA_VERSION="2.12.6"
+PROJECT=kaleidoscope/core
+TESTS=kaleidoscope/test
+SCALA_VERSION=2.12.6
 
 compile: bin .bloop
 	@bloop compile $(PROJECT)
@@ -20,7 +20,7 @@ clean:
 dependencies: probation magnolia escritoire contextual
 
 probation:
-	@git clone git@github.com:propensive/probation.git
+	@git clone git@github.com:propensive/probation.git --branch=fury
 
 scala-$(SCALA_VERSION):
 	@echo Downloading Scala $(SCALA_VERSION)
@@ -28,13 +28,13 @@ scala-$(SCALA_VERSION):
 	@tar xf scala-2.12.6.tgz
 
 magnolia:
-	@git clone git@github.com:propensive/magnolia.git
+	@git clone git@github.com:propensive/magnolia.git --branch=fury
 
 escritoire:
-	@git clone git@github.com:propensive/escritoire.git
+	@git clone git@github.com:propensive/escritoire.git --branch=fury
 
 contextual:
-	@git clone git@github.com:propensive/contextual.git
+	@git clone git@github.com:propensive/contextual.git --branch=fury
 
 install: scala-$(SCALA_VERSION)
 	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0-M10" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0-M10/install.py | python)
