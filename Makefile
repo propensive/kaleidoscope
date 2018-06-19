@@ -24,9 +24,9 @@ probation:
 
 scala-$(SCALA_VERSION):
 	@echo Downloading Scala $(SCALA_VERSION)
-	@wget https://downloads.lightbend.com/scala/$(SCALA_VERSION)/scala-$(SCALA_VERSION).tgz
-	@tar xf scala-2.12.6.tgz
-	@rm scala-2.12.6.tgz
+	@curl -O https://downloads.lightbend.com/scala/$(SCALA_VERSION)/scala-$(SCALA_VERSION).tgz
+	@tar xf scala-$(SCALA_VERSION).tgz
+	@rm scala-$(SCALA_VERSION).tgz
 
 magnolia:
 	@git clone git@github.com:propensive/magnolia.git --branch=fury
