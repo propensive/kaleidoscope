@@ -1,6 +1,6 @@
-PROJECT="kaleidoscope/core"
-TESTS="kaleidoscope/test"
-SCALA_VERSION="2.12.6"
+PROJECT=kaleidoscope/core
+TESTS=kaleidoscope/test
+SCALA_VERSION=2.12.6
 
 compile: bin .bloop
 	@bloop compile $(PROJECT)
