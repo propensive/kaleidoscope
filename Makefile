@@ -47,8 +47,8 @@ install: scala-$(SCALA_VERSION)
 	@mkdir -p .bloop
 	@for F in $(shell ls etc); do \
 		cp etc/$$F .bloop/$$F ; \
-		sed -i 's/\$$JAVA_HOME/$(shell echo $(JAVA_HOME) | sed 's/\//\\\//g')/g' .bloop/$$F ; \
-		sed -i 's/\$$PWD/$(shell echo $(PWD) | sed 's/\//\\\//g')/g' .bloop/$$F ; \
+		sed -i.'bak' 's/\$$JAVA_HOME/$(shell echo $(JAVA_HOME) | sed 's/\//\\\//g')/g' .bloop/$$F ; \
+		sed -i.'bak' 's/\$$PWD/$(shell echo $(PWD) | sed 's/\//\\\//g')/g' .bloop/$$F ; \
 		echo "Written file $$F to $(PWD)/.bloop/" ; \
 	done
 
