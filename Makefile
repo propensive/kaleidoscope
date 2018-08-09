@@ -17,10 +17,13 @@ bin:
 clean:
 	@rm -rf bin
 
-dependencies: probation magnolia escritoire contextual
+dependencies: ext/probation ext/magnolia ext/escritoire ext/contextual
 
-probation:
-	@git clone git@github.com:propensive/probation.git --branch=fury
+ext:
+	@mkdir -p ext
+
+ext/probation: ext
+	@git clone git@github.com:propensive/probation.git --branch=fury ext/probation
 
 scala-$(SCALA_VERSION):
 	@echo Downloading Scala $(SCALA_VERSION)
@@ -28,17 +31,17 @@ scala-$(SCALA_VERSION):
 	@tar xf scala-$(SCALA_VERSION).tgz
 	@rm scala-$(SCALA_VERSION).tgz
 
-magnolia:
-	@git clone git@github.com:propensive/magnolia.git --branch=fury
+ext/magnolia: ext
+	@git clone git@github.com:propensive/magnolia.git --branch=fury ext/magnolia
 
-escritoire:
-	@git clone git@github.com:propensive/escritoire.git --branch=fury
+ext/escritoire: ext
+	@git clone git@github.com:propensive/escritoire.git --branch=fury ext/escritoire
 
-contextual:
-	@git clone git@github.com:propensive/contextual.git --branch=fury
+ext/contextual: ext
+	@git clone git@github.com:propensive/contextual.git --branch=fury ext/contextual
 
 install: scala-$(SCALA_VERSION)
-	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0-M10" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0-M10/install.py | python)
+	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0/install.py | python)
 
 .bloop: dependencies
 	@test -n "$(JAVA_HOME)" || (echo 'JAVA_HOME has not been set' && exit 1)
