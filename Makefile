@@ -23,7 +23,7 @@ ext:
 	@mkdir -p ext
 
 ext/probation: ext
-	[ -d ext/probation ] || @git clone git@github.com:propensive/probation.git --branch=fury ext/probation
+	@[ -d ext/probation ] || git clone git@github.com:propensive/probation.git --branch=fury ext/probation
 
 scala-$(SCALA_VERSION):
 	@echo Downloading Scala $(SCALA_VERSION)
@@ -32,18 +32,18 @@ scala-$(SCALA_VERSION):
 	@rm scala-$(SCALA_VERSION).tgz
 
 ext/magnolia: ext
-	[ -d ext/magnolia ] || @git clone git@github.com:propensive/magnolia.git --branch=fury ext/magnolia
+	@[ -d ext/magnolia ] || git clone git@github.com:propensive/magnolia.git --branch=fury ext/magnolia
 
 ext/escritoire: ext
-	[ -d ext/escritoire ] || @git clone git@github.com:propensive/escritoire.git --branch=fury ext/escritoire
+	@[ -d ext/escritoire ] || git clone git@github.com:propensive/escritoire.git --branch=fury ext/escritoire
 
 ext/contextual: ext
-	[ -d ext/contextual ] || @git clone git@github.com:propensive/contextual.git --branch=fury ext/contextual
+	@[ -d ext/contextual ] || git clone git@github.com:propensive/contextual.git --branch=fury ext/contextual
 
 install: scala-$(SCALA_VERSION)
 	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0/install.py | python)
 
-.bloop: dependencies
+.bloop: etc dependencies
 	@test -n "$(JAVA_HOME)" || (echo 'JAVA_HOME has not been set' && exit 1)
 	@echo Using JAVA_HOME="$(JAVA_HOME)"
 	@echo Using PWD="$(PWD)"
