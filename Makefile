@@ -43,7 +43,7 @@ ext/contextual: ext
 install: scala-$(SCALA_VERSION)
 	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0/install.py | python)
 
-.bloop: etc dependencies
+.bloop: dependencies
 	@test -n "$(JAVA_HOME)" || (echo 'JAVA_HOME has not been set' && exit 1)
 	@echo Using JAVA_HOME="$(JAVA_HOME)"
 	@echo Using PWD="$(PWD)"
