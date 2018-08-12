@@ -1,0 +1,8 @@
+.bloop/
+bin/
+core/
+ext/
+out/
+project/
+scala-2.12.6/
+target/
