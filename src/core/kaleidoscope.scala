@@ -164,12 +164,6 @@ object Kaleidoscope {
   private[this] val cache: ConcurrentHashMap[String, Pattern] = new ConcurrentHashMap()
  
   /** provides access to the cached compiled `Pattern` object for the given string */
-  def pattern(p: String): Pattern = {
-    val result = cache.get(p)
-    if(result == null) {
-      val newPattern = Pattern.compile(p)
-      cache.put(p, newPattern)
-      newPattern
-    } else result
-  }
+  def pattern(p: String): Pattern =
+    cache.computeIfAbsent(p, Pattern.compile)
 }
