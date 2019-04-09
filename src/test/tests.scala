@@ -17,9 +17,9 @@
   the License.
 
 */
-package adversaria.tests
+package kaleidoscope.tests
 
-import probation.{TestApp, test}
+import probably.{TestApp, test}
 import contextual.data.scalac._
 import contextual.data.fqt._
 import annotation.StaticAnnotation

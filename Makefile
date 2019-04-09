@@ -17,7 +17,7 @@ bin:
 clean:
 	@rm -rf bin
 
-dependencies: ext/probation ext/magnolia ext/escritoire ext/contextual
+dependencies: ext/probation ext/magnolia ext/escritoire ext/contextual ext/mercator
 
 ext:
 	@mkdir -p ext
@@ -39,6 +39,9 @@ ext/escritoire: ext
 
 ext/contextual: ext
 	@git clone git@github.com:propensive/contextual.git --branch=fury ext/contextual
+
+ext/mercator: ext
+	@git clone git@github.com:propensive/mercator.git --branch=fury ext/mercator
 
 install: scala-$(SCALA_VERSION)
 	@which bloop >> /dev/null || (echo "Fetching bloop v1.0.0" && curl -L https://github.com/scalacenter/bloop/releases/download/v1.0.0/install.py | python)
