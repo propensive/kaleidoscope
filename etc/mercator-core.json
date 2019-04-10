@@ -1,12 +1,12 @@
 {
     "version" : "1.0.0",
     "project" : {
-        "name" : "magnolia/core",
+        "name" : "mercator/core",
         "directory" : "$PWD",
         "sources" : [
-            "$PWD/ext/magnolia/src/core"
+            "$PWD/ext/mercator/src/core"
         ],
-        "dependencies" : ["mercator/core"],
+        "dependencies" : [],
         "classpath" : [
             "$PWD/scala-2.12.6/lib/scala-library.jar", "$PWD/scala-2.12.6/lib/scala-xml_2.12-1.0.6.jar", "$PWD/scala-2.12.6/lib/scala-compiler.jar", "$PWD/scala-2.12.6/lib/scala-reflect.jar", "$PWD/bin/"
         ],
