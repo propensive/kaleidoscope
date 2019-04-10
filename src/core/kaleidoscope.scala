@@ -73,11 +73,22 @@ private[kaleidoscope] object Macros {
     val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
     val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
     val positions = partTrees.map { case lit@Literal(_) => lit.pos }
-   
-    def parsePart(part: String): Int = part.foldLeft((false, 0)) {
-      case ((esc, cnt), '(') => if(esc) (false, cnt) else (false, cnt + 1)
-      case ((esc, cnt), '\\') => (!esc, cnt)
-      case ((esc, cnt), _) => (false, cnt)
+
+    // This method counts the number of groups found in the regex. However,
+    // there are some constructs that look like groups but aren't, which need
+    // to be accounted for. In particular, non-capturing groups, zero-width lookahead/behind,
+    // and flags. Also there could be *named* capturing groups (which need to be counted).
+    //
+    // See "Special constructs (named-capturing and non-capturing)" on
+    // https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
+    // for the complete list.
+    def parsePart(part: String): Int = part.tails.map(_.take(3).drop(1)).zip(part.tails.map(_.take(1))).foldLeft((false, 0)) {
+      case ((esc, cnt), (_, "(")) if esc => (false, cnt)
+      case ((_, cnt), ("?<", "(")) => (false, cnt + 1) // named, capturing group
+      case ((_, cnt), (maybeGroup, "(")) if maybeGroup.startsWith("?") => (false, cnt) // not a group or non-capturing group
+      case ((_, cnt), (_, "(")) => (false, cnt + 1) // definitely a group
+      case ((esc, cnt), (_, "\\")) => (!esc, cnt)
+      case ((_, cnt), _) => (false, cnt)
     }._2
 
     parts.tail.foreach { p =>
