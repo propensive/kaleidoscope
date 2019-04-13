@@ -25,6 +25,7 @@ import contextual.data.fqt._
 import annotation.StaticAnnotation
 
 import kaleidoscope._
+import java.time.{LocalDate, LocalTime, LocalDateTime}
 
 
 object Tests extends TestApp {
@@ -105,5 +106,47 @@ object Tests extends TestApp {
         case _ => None
       }
     }.assert(_ == Some("foo"))
+
+    test("Date match") {
+      LocalDate.parse("2017-02-11") match {
+        case date"2017-02-11" => 1
+        case _ => None
+      }
+    }.assert(_ == 1)
+
+    test("Time match") {
+      LocalTime.parse("12:15:06") match {
+        case time"12:15:06" => 1
+        case _ => None
+      }
+    }.assert(_ == 1)
+
+    test("Time match without seconds") {
+      LocalTime.parse("12:15") match {
+        case time"12:15" => 1
+        case _ => None
+      }
+    }.assert(_ == 1)
+
+    test("DateTime match") {
+      LocalDateTime.parse("2007-12-03T10:15:30") match {
+        case datetime"2007-12-03T10:15:30" => 1
+        case _ => None
+      }
+    }.assert(_ == 1)
+
+    test("Date invalid") {
+      scalac"""LocalDate.parse("2017-02-11") match { case date"12:15:06" => 1 }"""
+    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalDate"))
+
+    test("Time invalid") {
+      scalac"""LocalTime.parse("12:15:06") match { case time"2017-02-11" => true }"""
+    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalTime"))
+
+    test("DateTime invalid") {
+      scalac"""
+        LocalDateTime.parse("2007-12-03T10:15:30") match { case datetime"2007-12-03 10:15:30" => true }
+      """
+    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalDateTime"))
   }
 }
