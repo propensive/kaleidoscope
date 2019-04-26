@@ -17,9 +17,9 @@
   the License.
 
 */
-package adversaria.tests
+package kaleidoscope.tests
 
-import probation.{TestApp, test}
+import probably.{TestApp, test}
 import contextual.data.scalac._
 import contextual.data.fqt._
 import annotation.StaticAnnotation
@@ -98,6 +98,12 @@ object Tests extends TestApp {
     test("BigInt non-literal extraction failure") {
       scalac"""BigInt("314159") match { case i"3$${x}14159" => x }"""
     }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
-    
+
+    test("Parse flags") {
+      "foo" match {
+        case r"(?i)$c@(foo)" => Option(c: String)
+        case _ => None
+      }
+    }.assert(_ == Some("foo"))
   }
 }
