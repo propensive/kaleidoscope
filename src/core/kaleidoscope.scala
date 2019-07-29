@@ -111,7 +111,7 @@ private[kaleidoscope] object Macros {
     
     val groupCalls = (1 until groups.length).map { idx =>
       val term = TermName("_"+idx)
-      q"""def $term: _root_.java.lang.String = matcher.group(${groups(idx)})"""
+      q"""def $term: _root_.java.lang.String = matcher.group(${groups(idx - 1) + 1})"""
     }
 
     try Pattern.compile(pattern) catch {
@@ -120,7 +120,7 @@ private[kaleidoscope] object Macros {
     }
 
     def getDef = groups.length match {
-      case 2 => q"def get = matcher.group(${groups(1)})"
+      case 2 => q"def get = matcher.group(${groups(0) + 1})"
       case _ => q"def get = this"
     }
 
