@@ -41,7 +41,11 @@ object Tests extends TestApp {
     test("extract one word") {
       "hello world" match { case r"$first@(hello) world" => first }
     }.assert(_ == "hello")
-    
+
+    test("extract a nested capture group") {
+      "hello world" match { case r"(($first@(hello)) world)" => first }
+    }.assert(_ == "hello")
+
     test("extract words") {
       "hello world" match { case r"$first@(hello) $second@(world)" => List(first, second) }
     }.assert(_ == List("hello", "world"))
@@ -49,10 +53,10 @@ object Tests extends TestApp {
     test("skipped capture group") {
       "hello world" match { case r"(hello) $second@(world)" => second }
     }.assert(_ == "world")
-    
-    test("unmatched capturing group") {
-      scalac""" "hello world" match { case r"(" => () } """
-    }.assert(_ == TypecheckError("kaleidoscope: Unclosed group in pattern"))
+
+    test("nested unbound capture group") {
+      "ab" match { case r"$x@(a(b))" => x }
+    }.assert(_ == "ab")
     
     test("spurious closing parethesis") {
       scalac""" "hello world" match { case r"(    ))" => () } """
