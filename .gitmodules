@@ -1,4 +1,0 @@
-[submodule "contextual"]
-	path = contextual
-	url = https://github.com/propensive/contextual.git
-	branch = fury
