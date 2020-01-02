@@ -19,6 +19,9 @@
 */
 package kaleidoscope
 
+import java.time.format.DateTimeParseException
+import java.time.{LocalDate, LocalDateTime, LocalTime}
+
 import language.experimental.macros
 import reflect._, reflect.macros._
 import java.util.regex._
@@ -146,6 +149,57 @@ private[kaleidoscope] object Macros {
       }
     }.unapply(..$args)"""
   }
+
+  def localDateUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
+    import c.universe._
+
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
+    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
+
+    if(parts.length > 1) abort(c)("only literal extractions are permitted")
+    try LocalDate.parse(parts.head)
+    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalDate") }
+
+    q"""new {
+      def unapply(input: _root_.java.time.LocalDate): _root_.scala.Boolean = {
+        input == LocalDate.parse(${parts.head})
+      }
+    }.unapply(..$args)"""
+  }
+
+  def localTimeUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
+    import c.universe._
+
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
+    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
+
+    if(parts.length > 1) abort(c)("only literal extractions are permitted")
+    try LocalTime.parse(parts.head)
+    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalTime") }
+
+    q"""new {
+      def unapply(input: _root_.java.time.LocalTime): _root_.scala.Boolean = {
+        input == LocalTime.parse(${parts.head})
+      }
+    }.unapply(..$args)"""
+  }
+
+  def localDateTimeUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
+    import c.universe._
+
+    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
+    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
+
+    if(parts.length > 1) abort(c)("only literal extractions are permitted")
+    try LocalDateTime.parse(parts.head)
+    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalDateTime") }
+
+    q"""new {
+      def unapply(input: _root_.java.time.LocalDateTime): _root_.scala.Boolean = {
+        input == LocalDateTime.parse(${parts.head})
+      }
+    }.unapply(..$args)"""
+  }
 }
 
 object `package` {
@@ -167,6 +221,18 @@ object `package` {
     
     object i {
       def unapply(scrutinee: BigInt): Any = macro Macros.intUnapply
+    }
+
+    object date {
+      def unapply(scrutinee: LocalDate): Any = macro Macros.localDateUnapply
+    }
+
+    object time {
+      def unapply(scrutinee: LocalTime): Any = macro Macros.localTimeUnapply
+    }
+
+    object datetime {
+      def unapply(scrutinee: LocalDateTime): Any = macro Macros.localDateTimeUnapply
     }
   }
 }
