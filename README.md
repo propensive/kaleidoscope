@@ -38,7 +38,7 @@ email match {
 }
 ```
 
-Such patterns with either match or not, however should they match, it is
+Such patterns will either match or not, however should they match, it is
 possible to extract parts of the matched string using capturing groups. The
 pattern syntax is exactly as described in the [Java Standard
 Library](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html),
