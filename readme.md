@@ -1,20 +1,16 @@
-[![Latest version](https://index.scala-lang.org/propensive/kaleidoscope/latest.svg)](https://index.scala-lang.org/propensive/kaleidoscope)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.propensive/kaleidoscope_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.propensive/kaleidoscope_2.12)
+<a href="https://furore.dev/propensive/kaleidoscope"><img src="/doc/images/furore.png" style="vertical-align:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://furore.dev/propensive/kaleidoscope">__Develop with Fury__ </a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://riot.im/app/#/room/#propensive.kaleidoscope:matrix.org"><img src="/doc/images/riotim.png" style="vertical-arign:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://riot.im/app/#/room/#propensive.kaleidoscope:matrix.org">__Discuss on Riot__</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://search.maven.org/search?q=g:com.propensive%20AND%20a:kaleidoscope_2.12"><img src="/doc/images/mavencentral.png" style="vertical-arign:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://search.maven.org/search?q=g:com.propensive%20AND%20a:kaleidoscope_2.12">__Download from Maven Central__</a>
+
+<img src="/doc/images/github.png" valign="middle">
 
 # Kaleidoscope
 
-[![Join the chat at https://gitter.im/propensive/kaleidoscope](https://badges.gitter.im/propensive/kaleidoscope.svg)](https://gitter.im/propensive/kaleidoscope?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+Kaleidoscope is a small library which provides pattern matching using regular expressions, and extraction of capturing groups into values. In particular, patterns are written inline, and do not need to be predefined.
 
-## Availability
+## Features
 
-An early release of Kaleidoscope is available on Maven Central, and can be
-included in an sbt project by including,
-```
-"com.propensive" %% "kaleidoscope" % "0.1.0"
-```
-in your `build.sbt` file.
 
-## Usage
+
+## Getting Started
 
 To use Kaleidoscope, first import its package,
 ```scala
@@ -74,22 +70,45 @@ still necessary, however, to follow the regular expression escaping rules, for
 example, an extractor matching a single opening parenthesis would be written as
 `r"\("` or `r"""\("""`.
 
-## Limitations
+### Limitations
 
 Kaleidoscope currently has no support for optional or repeated capturing
 groups, however this will probably be added very soon.
 
-## Disclaimer
 
-This is very experimental software, and should not be considered
-production-ready.
+## Availability
 
-## Website
+Kaleidoscope&rsquo;s source is available on GitHub, and may be built with [Fury](https://github.com/propensive/fury) by
+cloning the layer `propensive/kaleidoscope`.
+```
+fury layer clone -i propensive/kaleidoscope
+```
+or imported into an existing layer with,
+```
+fury layer import -i propensive/kaleidoscope
+```
+A binary will be made available on Maven Central.
 
-There is currently no website for Kaleidoscope.
+## Contributing
+
+Contributors to Kaleidoscope are welcome and encouraged. New contributors may like to look for issues marked
+<a href="https://github.com/propensive/kaleidoscope/labels/good%20first%20issue"><img alt="label: good first issue"
+src="https://img.shields.io/badge/-good%20first%20issue-67b6d0.svg" valign="middle"></a>.
+
+We suggest that all contributors read the [Contributing Guide](/contributing.md) to make the process of
+contributing to Kaleidoscope easier.
+
+Please __do not__ contact project maintainers privately with questions, as other users cannot then benefit from
+the answers.
+
+## Author
+
+Kaleidoscope was designed and developed by [Jon Pretty](https://twitter.com/propensive), and commercial support and
+training is available from [Propensive O&Uuml;](https://propensive.com/).
+
+
 
 ## License
 
-Kaleidoscope is made available under the Apache 2.0 license.
-
-
+Kaleidoscope is copyright &copy; 2018-20 Jon Pretty & Propensive O&Uuml;, and is made available under the
+[Apache 2.0 License](/license.md).

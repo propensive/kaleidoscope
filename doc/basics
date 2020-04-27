@@ -1,0 +1,62 @@
+To use Kaleidoscope, first import its package,
+```scala
+import kaleidoscope._
+```
+
+and you can then use a Kaleidoscope regular expression—a string prefixed with
+the letter `r`—anywhere you can use a pattern in Scala. For example,
+```scala
+path match {
+  case r"/images/.*" => println("image")
+  case r"/styles/.*" => println("stylesheet")
+  case _ => println("something else")
+}
+```
+or,
+```scala
+email match {
+  case r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,6}$$" => Some(email)
+  case _ => None
+}
+```
+
+Such patterns will either match or not, however should they match, it is
+possible to extract parts of the matched string using capturing groups. The
+pattern syntax is exactly as described in the [Java Standard
+Library](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html),
+with the exception that a capturing group (enclosed within `(` and `)`) may be
+bound to an identifier by prefixing the group with an `@`, and the identifier
+to extract to, which in standard Scala syntax, is written either as
+`$identifier` or `${identifier}`.
+
+Here is an example:
+```scala
+path match {
+  case r"/images/${img}@(.*)" => Image(img)
+  case r"/styles/$styles@(.*)" => Stylesheet(styles)
+}
+```
+
+or as an extractor on a `val`, like so,
+```scala
+val r"^[a-z0-9._%+-]+@$domain@([a-z0-9.-]+\.$tld@([a-z]{2,6})$$" = "test@example.com"
+> domain: String = "example.com"
+> tld: String = "com"
+```
+
+In addition, regular expressions will be checked at compile-time, and any
+issues will be reported then.
+
+## Escaping
+
+Note that inside an extractor pattern string, whether it is single- (`r"..."`)
+or triple-quoted (`r"""..."""`), special characters, notably `\`, do not need
+to be escaped, with the exception of `$` which should be written as `$$`. It is
+still necessary, however, to follow the regular expression escaping rules, for
+example, an extractor matching a single opening parenthesis would be written as
+`r"\("` or `r"""\("""`.
+
+### Limitations
+
+Kaleidoscope currently has no support for optional or repeated capturing
+groups, however this will probably be added very soon.
