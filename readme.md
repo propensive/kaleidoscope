@@ -1,11 +1,12 @@
-<img src="/doc/images/github.png" valign="middle">
 
-[<img src="https://img.shields.io/badge/gitter-discuss%2Fkaleidoscope-f000762?style=for-the-badge" height="24">](https://gitter.im/propensive/kaleidoscope)
+[<img src="https://img.shields.io/badge/gitter-discuss-f00762?style=for-the-badge" height="24">](https://gitter.im/propensive/kaleidoscope)
 [<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/CHCPjERybv)
 [<img src="https://img.shields.io/matrix/propensive.kaleidoscope:matrix.org?label=MATRIX&color=0dbd8b&style=for-the-badge" height="24">](https://app.element.io/#/room/#propensive.kaleidoscope:matrix.org)
 [<img src="https://img.shields.io/twitter/follow/propensive?color=%2300acee&label=TWITTER&style=for-the-badge" height="24">](https://twitter.com/propensive)
 [<img src="https://img.shields.io/maven-central/v/com.propensive/kaleidoscope-core_2.12?color=2465cd&style=for-the-badge" height="24">](https://search.maven.org/artifact/com.propensive/kaleidoscope-core_2.12)
 [<img src="https://img.shields.io/badge/vent-propensive%2Fkaleidoscope-f05662?style=for-the-badge" height="24">](https://vent.dev)
+
+<img src="/doc/images/github.png" valign="middle">
 
 # Kaleidoscope
 
