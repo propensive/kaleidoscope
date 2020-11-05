@@ -1,3 +1,5 @@
+<img src="/doc/images/200x200.png" align="right">
+
 # Contributing to Kaleidoscope
 
 Firstly, thank you for taking an interesting in contributing! Kaleidoscope is an open-source project, and welcomes

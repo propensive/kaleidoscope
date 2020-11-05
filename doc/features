@@ -1,0 +1,4 @@
+- pattern match strings against regular expressions
+- regular expressions can be written inline in patterns
+- extraction of capturing groups in patterns
+- static verification of regular expression syntax

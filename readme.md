@@ -1,6 +1,11 @@
-<a href="https://furore.dev/propensive/kaleidoscope"><img src="/doc/images/furore.png" style="vertical-align:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://furore.dev/propensive/kaleidoscope">__Develop with Fury__ </a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://riot.im/app/#/room/#propensive.kaleidoscope:matrix.org"><img src="/doc/images/riotim.png" style="vertical-arign:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://riot.im/app/#/room/#propensive.kaleidoscope:matrix.org">__Discuss on Riot__</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://search.maven.org/search?q=g:com.propensive%20AND%20a:kaleidoscope_2.12"><img src="/doc/images/mavencentral.png" style="vertical-arign:middle" valign="middle"></a>&nbsp;&nbsp;<a href="https://search.maven.org/search?q=g:com.propensive%20AND%20a:kaleidoscope_2.12">__Download from Maven Central__</a>
-
 <img src="/doc/images/github.png" valign="middle">
+
+[<img src="https://img.shields.io/badge/gitter-discuss%2Fkaleidoscope-f000762?style=for-the-badge" height="24">](https://gitter.im/propensive/kaleidoscope)
+[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/CHCPjERybv)
+[<img src="https://img.shields.io/matrix/propensive.kaleidoscope:matrix.org?label=MATRIX&color=0dbd8b&style=for-the-badge" height="24">](https://app.element.io/#/room/#propensive.kaleidoscope:matrix.org)
+[<img src="https://img.shields.io/twitter/follow/propensive?color=%2300acee&label=TWITTER&style=for-the-badge" height="24">](https://twitter.com/propensive)
+[<img src="https://img.shields.io/maven-central/v/com.propensive/kaleidoscope-core_2.12?color=2465cd&style=for-the-badge" height="24">](https://search.maven.org/artifact/com.propensive/kaleidoscope-core_2.12)
+[<img src="https://img.shields.io/badge/vent-propensive%2Fkaleidoscope-f05662?style=for-the-badge" height="24">](https://vent.dev)
 
 # Kaleidoscope
 
@@ -8,6 +13,10 @@ Kaleidoscope is a small library which provides pattern matching using regular ex
 
 ## Features
 
+- pattern match strings against regular expressions
+- regular expressions can be written inline in patterns
+- extraction of capturing groups in patterns
+- static verification of regular expression syntax
 
 
 ## Getting Started
@@ -61,7 +70,7 @@ val r"^[a-z0-9._%+-]+@$domain@([a-z0-9.-]+\.$tld@([a-z]{2,6})$$" = "test@example
 In addition, regular expressions will be checked at compile-time, and any
 issues will be reported then.
 
-## Escaping
+### Escaping
 
 Note that inside an extractor pattern string, whether it is single- (`r"..."`)
 or triple-quoted (`r"""..."""`), special characters, notably `\`, do not need
@@ -73,8 +82,18 @@ example, an extractor matching a single opening parenthesis would be written as
 ### Limitations
 
 Kaleidoscope currently has no support for optional or repeated capturing
-groups, however this will probably be added very soon.
+groups.
 
+
+## Status
+
+Kaleidoscope is classified as __maturescent__. Propensive defines the following five stability levels for open-source projects:
+
+- _embryonic_: for experimental or demonstrative purposes only, without guarantee of longevity
+- _fledgling_: of proven utility, seeking contributions, but liable to significant redesigns
+- _maturescent_: major design decisions broady settled, seeking probatory adoption and refinement of designs
+- _dependable_: production-ready, subject to controlled ongoing maintenance and enhancement; tagged as version `1.0` or later
+- _adamantine_: proven, reliable and production-ready, with no further breaking changes ever anticipated
 
 ## Availability
 
@@ -87,7 +106,11 @@ or imported into an existing layer with,
 ```
 fury layer import -i propensive/kaleidoscope
 ```
-A binary will be made available on Maven Central.
+A binary is available on Maven Central as `com.propensive:kaleidoscope-core_<scala-version>:0.4.0`. This may be added
+to an [sbt](https://www.scala-sbt.org/) build with:
+```
+libraryDependencies += "com.propensive" %% "kaleidoscope-core" % "0.4.0"
+```
 
 ## Contributing
 
