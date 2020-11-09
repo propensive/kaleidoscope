@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -14,20 +14,20 @@
     See the License for the specific language governing permissions and limitations under the License.
 
 */
-package kaleidoscope.tests
+package kaleidoscope.test
 
-import probably.{TestApp, test}
-import contextual.data.scalac._
-import contextual.data.fqt._
+import probably._
+import contextual.examples.scalac._
+import contextual.examples.fqt._
 import annotation.StaticAnnotation
 
 import kaleidoscope._
 import java.time.{LocalDate, LocalTime, LocalDateTime}
 
 
-object Tests extends TestApp {
+object Tests extends Suite("Kaleidoscope tests") {
 
-  def tests(): Unit = {
+  def run(test: Runner): Unit = {
     test("simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)

@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -18,6 +18,8 @@ package kaleidoscope
 
 import contextual._
 
+import language.experimental.macros
+
 object bigDecimal {
   object BigDecimalParser extends Verifier[BigDecimal] {
     def check(string: String): Either[(Int, String), BigDecimal] =
@@ -25,7 +27,9 @@ object bigDecimal {
       catch { case e: NumberFormatException => Left((0, "could not parse decimal")) }
   }
 
-  implicit class BigDecimalStringContext(sc: StringContext) { val d = Prefix(BigDecimalParser, sc) }
+  implicit class BigDecimalStringContext(sc: StringContext) {
+    def d(expressions: Nothing*): BigDecimal = macro contextual.Macros.contextual[BigDecimalParser.type]
+  }
 }
 
 object bigInt {
@@ -35,5 +39,7 @@ object bigInt {
       catch { case e: NumberFormatException => Left((0, "could not parse integer")) }
   }
 
-  implicit class BigIntStringContext(sc: StringContext) { val i = Prefix(BigIntParser, sc) }
+  implicit class BigIntStringContext(sc: StringContext) {
+    def i(expressions: Nothing*): BigInt = macro contextual.Macros.contextual[BigIntParser.type]
+  }
 }

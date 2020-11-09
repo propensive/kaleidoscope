@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -17,6 +17,8 @@
 package kaleidoscope
 
 import contextual._
+
+import language.experimental.macros
 
 object hex {
 
@@ -72,5 +74,7 @@ object hex {
     }
   }
 
-  implicit class HexStringContext(sc: StringContext) { val hex = Prefix(HexParser, sc) }
+  implicit class HexStringContext(sc: StringContext) {
+    def hex(expressions: Nothing*): Array[Byte] = macro contextual.Macros.contextual[HexParser.type]
+  }
 }

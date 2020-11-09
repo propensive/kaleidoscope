@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -19,6 +19,8 @@ package kaleidoscope
 import contextual._
 import javax.xml.xpath._
 import scala.util._
+
+import language.experimental.macros
 
 object xpath {
   object XpathParser extends Interpolator {
@@ -47,5 +49,7 @@ object xpath {
     }
   }
 
-  implicit class XpathStringContext(sc: StringContext) { val xpath = Prefix(XpathParser, sc) }
+  implicit class XpathStringContext(sc: StringContext) {
+    def xpath(expressions: Nothing*): XPathExpression = macro contextual.Macros.contextual[XpathParser.type]
+  }
 }

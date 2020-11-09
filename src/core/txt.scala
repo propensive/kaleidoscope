@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -19,6 +19,8 @@ package kaleidoscope
 import contextual._
 import scala.util.matching._
 
+import language.experimental.macros
+
 object txt {
 
   object TxtParser extends Interpolator {
@@ -33,5 +35,7 @@ object txt {
       interpolation.parts.mkString.stripMargin
   }
 
-  implicit class TxtStringContext(sc: StringContext) { val txt = Prefix(TxtParser, sc) }
+  implicit class TxtStringContext(sc: StringContext) {
+    def txt(expressions: String*): String = macro contextual.Macros.contextual[TxtParser.type]
+  }
 }

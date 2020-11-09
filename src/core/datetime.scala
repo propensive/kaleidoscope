@@ -1,6 +1,6 @@
 /*
 
-    Kaleidoscope, version v0.2.1. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.4.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
@@ -19,6 +19,8 @@ package kaleidoscope
 import contextual._
 import java.time.{LocalDate, LocalTime, LocalDateTime}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
+
+import language.experimental.macros
 
 object datetime {
   object DateParser extends Verifier[LocalDate] {
@@ -42,7 +44,15 @@ object datetime {
     }
   }
 
-  implicit class DateStringContext(sc: StringContext) { val date = Prefix(DateParser, sc) }
-  implicit class TimeStringContext(sc: StringContext) { val time = Prefix(TimeParser, sc) }
-  implicit class DateTimeStringContext(sc: StringContext) { val datetime = Prefix(DateTimeParser, sc) }
+  implicit class DateStringContext(sc: StringContext) {
+    def time(expressions: Nothing*): LocalDate = macro contextual.Macros.contextual[DateParser.type]
+  }
+  
+  implicit class TimeStringContext(sc: StringContext) {
+    def time(expressions: Nothing*): LocalTime = macro contextual.Macros.contextual[TimeParser.type]
+  }
+  
+  implicit class DateTimeStringContext(sc: StringContext) {
+    def datetime(expressions: Nothing*): LocalDateTime = macro contextual.Macros.contextual[DateTimeParser.type]
+  }
 }
