@@ -14,20 +14,16 @@
     See the License for the specific language governing permissions and limitations under the License.
 
 */
-package kaleidoscope.test
+package kaleidoscope
 
 import probably._
-import contextual.examples.scalac._
-import contextual.examples.fqt._
 import annotation.StaticAnnotation
 
 import kaleidoscope._
-import java.time.{LocalDate, LocalTime, LocalDateTime}
 
+object Tests extends Suite("Kaleidoscope tests"):
 
-object Tests extends Suite("Kaleidoscope tests") {
-
-  def run(test: Runner): Unit = {
+  def run(using Runner): Unit =
     test("simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)
@@ -45,109 +41,23 @@ object Tests extends Suite("Kaleidoscope tests") {
     }.assert(_ == "hello")
 
     test("extract words") {
-      "hello world" match { case r"$first@(hello) $second@(world)" => List(first, second) }
+      "hello world" match
+        case r"$first@(hello) $second@(world)" => List(first, second)
     }.assert(_ == List("hello", "world"))
     
     test("skipped capture group") {
       "hello world" match { case r"(hello) $second@(world)" => second }
     }.assert(_ == "world")
 
+    test("skipped capture group 2") {
+      "1 2 3 4 5" match { case r"1 $two@(2) 3 4 5" => two }
+    }.assert(_ == "2")
+
     test("nested unbound capture group") {
-      "ab" match { case r"$x@(a(b))" => x }
-    }.assert(_ == "ab")
-    
-    test("spurious closing parethesis") {
-      scalac""" "hello world" match { case r"(    ))" => () } """
-    }.assert(_ == TypecheckError("kaleidoscope: Unmatched closing ')' in pattern"))
-    
-    test("invalid terminal escape") {
-      scalac""" "hello world" match { case r"()\" => () } """
-    }.assert(_ == TypecheckError("kaleidoscope: Unexpected internal error in pattern"))
+      "anyval" match { case r"$x@(any(val))" => x }
+    }.assert(_ == "anyval")
     
     test("email regex") {
       val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" = "test@example.com"
       List(prefix, domain, tld)
     }.assert(_ == List("test", "example", "com"))
-    
-    test("BigDecimal match") {
-      BigDecimal("3.14159") match { case d"3.14159" => "pi"; case _ => "not pi" }
-    }.assert(_ == "pi")
-    
-    test("BigDecimal non-match") {
-      BigDecimal("1.0") match { case d"3.14159" => "pi"; case _ => "not pi" }
-    }.assert(_ == "not pi")
-    
-    test("BigDecimal static failure") {
-      scalac"""BigDecimal("3.14159") match { case d"3x14159" => true }"""
-    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid BigDecimal"))
-    
-    test("BigDecimal non-literal extraction failure") {
-      scalac"""BigDecimal("3.14159") match { case d"3$${x}14159" => x }"""
-    }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
-    
-    test("BigInt match") {
-      BigInt("314159") match { case i"314159" => "yes"; case _ => "no" }
-    }.assert(_ == "yes")
-    
-    test("BigInt non-match") {
-      BigInt("10") match { case i"314159" => "yes"; case _ => "no" }
-    }.assert(_ == "no")
-    
-    test("BigInt static failure") {
-      scalac"""BigInt("1") match { case i"xyz" => true }"""
-    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid BigInt"))
-    
-    test("BigInt non-literal extraction failure") {
-      scalac"""BigInt("314159") match { case i"3$${x}14159" => x }"""
-    }.assert(_ == TypecheckError("kaleidoscope: only literal extractions are permitted"))
-
-    test("Parse flags") {
-      "foo" match {
-        case r"(?i)$c@(foo)" => Option(c: String)
-        case _ => None
-      }
-    }.assert(_ == Some("foo"))
-
-    test("Date match") {
-      LocalDate.parse("2017-02-11") match {
-        case date"2017-02-11" => 1
-        case _ => None
-      }
-    }.assert(_ == 1)
-
-    test("Time match") {
-      LocalTime.parse("12:15:06") match {
-        case time"12:15:06" => 1
-        case _ => None
-      }
-    }.assert(_ == 1)
-
-    test("Time match without seconds") {
-      LocalTime.parse("12:15") match {
-        case time"12:15" => 1
-        case _ => None
-      }
-    }.assert(_ == 1)
-
-    test("DateTime match") {
-      LocalDateTime.parse("2007-12-03T10:15:30") match {
-        case datetime"2007-12-03T10:15:30" => 1
-        case _ => None
-      }
-    }.assert(_ == 1)
-
-    test("Date invalid") {
-      scalac"""LocalDate.parse("2017-02-11") match { case date"12:15:06" => 1 }"""
-    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalDate"))
-
-    test("Time invalid") {
-      scalac"""LocalTime.parse("12:15:06") match { case time"2017-02-11" => true }"""
-    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalTime"))
-
-    test("DateTime invalid") {
-      scalac"""
-        LocalDateTime.parse("2007-12-03T10:15:30") match { case datetime"2007-12-03 10:15:30" => true }
-      """
-    }.assert(_ == TypecheckError("kaleidoscope: this is not a valid LocalDateTime"))
-  }
-}

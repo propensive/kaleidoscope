@@ -16,233 +16,64 @@
 */
 package kaleidoscope
 
-import java.time.format.DateTimeParseException
-import java.time.{LocalDate, LocalDateTime, LocalTime}
-
-import language.experimental.macros
-import reflect._, reflect.macros._
-import java.util.regex._
+import java.util.regex.*
 import java.util.concurrent.ConcurrentHashMap
 
-private[kaleidoscope] object Macros {
+import scala.quoted.*
 
-  private def abort[Ctx <: whitebox.Context](c: Ctx)(msg: String): Nothing =
-    c.abort(c.enclosingPosition, s"kaleidoscope: $msg")
+extension (inline sc: StringContext)
+  transparent inline def r: Any = ${Regex.extractor('{sc})}
 
-  def intUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
-    import c.universe._
-
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-
-    if(parts.length > 1) abort(c)("only literal extractions are permitted")
-    try BigInt(parts.head)
-    catch { case e: NumberFormatException => abort(c)("this is not a valid BigInt")
-    }
-
-    q"""new {
-      def unapply(input: _root_.scala.math.BigInt): _root_.scala.Boolean = {
-        input == BigInt(${parts.head})
-      }
-    }.unapply(..$args)"""
-  }
+object Regex:
+  private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
   
-  def decimalUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
-    import c.universe._
+  def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile)
 
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-
-    if(parts.length > 1) abort(c)("only literal extractions are permitted")
-    try BigDecimal(parts.head)
-    catch { case e: NumberFormatException =>
-      abort(c)("this is not a valid BigDecimal")
-    }
-
-    q"""new {
-      def unapply(input: _root_.scala.math.BigDecimal): _root_.scala.Boolean = {
-        input == BigDecimal(${parts.head})
-      }
-    }.unapply(..$args)"""
-  }
-  
-  /** macro implementation to generate the extractor AST for the given pattern */
-  def stringUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree = {
-    import c.universe._
-
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-    val positions = partTrees.map { case lit@Literal(_) => lit.pos }
-
-    // This method counts the number of groups found in the regex. However,
-    // there are some constructs that look like groups but aren't, which need
-    // to be accounted for. In particular, non-capturing groups, zero-width lookahead/behind,
-    // and flags. Also there could be *named* capturing groups (which need to be counted).
-    //
-    // See "Special constructs (named-capturing and non-capturing)" on
-    // https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
-    // for the complete list.
-    def countGroups(part: String): Int = {
-      val (_, count) = part.tails.map{ tail =>
-        tail.take(1) -> tail.take(3).drop(1)
-      }.foldLeft((false, 0)) {
-        case ((esc, cnt), ("(", _)) if esc => (false, cnt)
-        case ((_, cnt), ("(", "?<")) => (false, cnt + 1) // named, capturing group
-        case ((_, cnt), ("(", maybeGroup)) if maybeGroup.startsWith("?") => (false, cnt) // not a group or non-capturing group
-        case ((_, cnt), ("(", _)) => (false, cnt + 1) // definitely a group
-        case ((esc, cnt), ("\\", _)) => (!esc, cnt)
-        case ((_, cnt), _) => (false, cnt)
-      }
-      count
-    }
-
-    parts.tail.foreach { p =>
-      if(p.length < 2 || p.head != '@' || p(1) != '(')
-        abort(c)("variable must be bound to a capturing group")
-    }
+  def extractor(sc: Expr[StringContext])(using quotes: Quotes): Expr[Any] =
+    import quotes.reflect.*
+    val parts = sc.value.get.parts
     
-    val cumulativeGroupsPerPart = parts.map(countGroups).inits.map(_.sum).to[List].reverse.tail
-
-    val pattern = (parts.head :: parts.tail.map(_.tail)).mkString
-    
-    def findPosition(xs: List[String], err: Int, str: Int): Position = {
-      xs match {
-        case Nil => positions(str - 1).withPoint(positions(str - 1).point + err)
-        case head :: tail =>
-          if(head.length < err) findPosition(tail, err - head.length + 1, str + 1)
-          else findPosition(Nil, err, str + 1)
-      }
-    }
-    
-    val groupCalls = (1 until cumulativeGroupsPerPart.length).map { idx =>
-      val term = TermName("_"+idx)
-      q"""def $term: _root_.java.lang.String = matcher.group(${cumulativeGroupsPerPart(idx - 1) + 1})"""
-    }
-
-    try Pattern.compile(pattern) catch {
-      case e: PatternSyntaxException =>
-        c.abort(findPosition(parts, e.getIndex, 0), s"kaleidoscope: ${e.getDescription} in pattern")
-    }
-
-    def getDef = parts.length match {
-      case 2 => q"def get = matcher.group(${cumulativeGroupsPerPart(0) + 1})"
-      case _ => q"def get = this"
-    }
-
-    if(cumulativeGroupsPerPart.length == 1) q"""new {
-      def unapply(input: _root_.java.lang.String): _root_.scala.Boolean = {
-        val m = _root_.kaleidoscope.Kaleidoscope.pattern($pattern).matcher(input)
-        m.matches()
-      }
-    }.unapply(..$args)"""
-    else q"""new {
-      class Match(matcher: _root_.java.util.regex.Matcher) {
-        
-        def isEmpty = !matcher.matches()
-        $getDef
-        ..$groupCalls
+    def countGroups(part: String): Int =
+      val (_, count) = part.tails.map { tail => tail.take(1) -> tail.take(3).drop(1) }.foldLeft((false, 0)) {
+        case ((esc, cnt), ("(", _)) if esc                               => (false, cnt)
+        case ((_, cnt), ("(", "?<"))                                     => (false, cnt + 1)
+        case ((_, cnt), ("(", maybeGroup)) if maybeGroup.startsWith("?") => (false, cnt)
+        case ((_, cnt), ("(", _))                                        => (false, cnt + 1)
+        case ((esc, cnt), ("\\", _))                                     => (!esc, cnt)
+        case ((_, cnt), _)                                               => (false, cnt)
       }
       
-      def unapply(input: _root_.java.lang.String): Match = {
-        val matcher: _root_.java.util.regex.Matcher =
-          _root_.kaleidoscope.Kaleidoscope.pattern($pattern).matcher(input)
-        
-        new Match(matcher)
-      }
-    }.unapply(..$args)"""
-  }
+      count
 
-  def localDateUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
-    import c.universe._
-
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-
-    if(parts.length > 1) abort(c)("only literal extractions are permitted")
-    try LocalDate.parse(parts.head)
-    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalDate") }
-
-    q"""new {
-      def unapply(input: _root_.java.time.LocalDate): _root_.scala.Boolean = {
-        input == LocalDate.parse(${parts.head})
-      }
-    }.unapply(..$args)"""
-  }
-
-  def localTimeUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
-    import c.universe._
-
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-
-    if(parts.length > 1) abort(c)("only literal extractions are permitted")
-    try LocalTime.parse(parts.head)
-    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalTime") }
-
-    q"""new {
-      def unapply(input: _root_.java.time.LocalTime): _root_.scala.Boolean = {
-        input == LocalTime.parse(${parts.head})
-      }
-    }.unapply(..$args)"""
-  }
-
-  def localDateTimeUnapply(c: whitebox.Context)(scrutinee: c.Tree): c.Tree =  {
-    import c.universe._
-
-    val q"$_($_(..$partTrees)).$_.$method[..$_](..$args)" = c.macroApplication
-    val parts = partTrees.map { case lit@Literal(Constant(s: String)) => s }
-
-    if(parts.length > 1) abort(c)("only literal extractions are permitted")
-    try LocalDateTime.parse(parts.head)
-    catch { case e: DateTimeParseException => abort(c)("this is not a valid LocalDateTime") }
-
-    q"""new {
-      def unapply(input: _root_.java.time.LocalDateTime): _root_.scala.Boolean = {
-        input == LocalDateTime.parse(${parts.head})
-      }
-    }.unapply(..$args)"""
-  }
-}
-
-object `package` {
-  /** provides the `r` extractor on strings for creating regular expression pattern matches */
-  implicit class KaleidoscopeContext(sc: StringContext) {
-    object r {
-      /** returns an unapply extractor for the pattern described by the string context */
-      def unapply(scrutinee: String): Any = macro Macros.stringUnapply
-    }
-
-    object regex {
-      /** returns an unapply extractor for the pattern described by the string context */
-      def unapply(scrutinee: String): Any = macro Macros.stringUnapply
-    }
-
-    object d {
-      def unapply(scrutinee: BigDecimal): Any = macro Macros.decimalUnapply
+    val groups: List[Int] = parts.map(countGroups).inits.map(_.sum).to(List).reverse.tail
+    val pattern = (parts.head +: parts.tail.map(_.tail)).mkString
+    
+    parts.tail.foreach { p =>
+      if p.length < 2 || p.head != '@' || p(1) != '('
+      then report.error("kaleidoscope: variable must be bound to a capturing group")
     }
     
-    object i {
-      def unapply(scrutinee: BigInt): Any = macro Macros.intUnapply
+    try Pattern.compile(pattern)
+    catch case e: PatternSyntaxException => report.error(s"kaleidoscope: ${e.getDescription} in pattern")
+    
+    if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
+    else '{Regex.Extraction(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
+  
+  private def matcher(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]], scrutinee: Expr[String])
+             (using quotes: Quotes): Expr[Option[Any]] =
+    import quotes.reflect.*
+    
+    '{
+      val matcher = Regex.pattern($pattern).matcher($scrutinee)
+      if matcher.matches() then
+        val matches = (1 until $groups.length ).to(Array).map { idx => matcher.group($groups(idx - 1) + 1) }
+        Some(if matches.size == 1 then matches.head else Tuple.fromArray(matches))
+      else None
     }
 
-    object date {
-      def unapply(scrutinee: LocalDate): Any = macro Macros.localDateUnapply
-    }
+  case class Simple(pattern: String):
+    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).matches
 
-    object time {
-      def unapply(scrutinee: LocalTime): Any = macro Macros.localTimeUnapply
-    }
-
-    object datetime {
-      def unapply(scrutinee: LocalDateTime): Any = macro Macros.localDateTimeUnapply
-    }
-  }
-}
-
-object Kaleidoscope {
-  private[this] val cache: ConcurrentHashMap[String, Pattern] = new ConcurrentHashMap()
- 
-  /** provides access to the cached compiled `Pattern` object for the given string */
-  def pattern(p: String): Pattern =
-    cache.computeIfAbsent(p, Pattern.compile)
-}
+  case class Extraction(pattern: String, matchedGroups: List[Int], parts: Seq[String]):
+    inline def unapply(inline scrutinee: String): Option[Any] =
+      ${Regex.matcher('pattern, 'matchedGroups, 'parts, 'scrutinee)}
