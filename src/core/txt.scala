@@ -19,8 +19,6 @@ package kaleidoscope
 import contextual._
 import scala.util.matching._
 
-import language.experimental.macros
-
 object txt {
 
   object TxtParser extends Interpolator {
@@ -36,6 +34,6 @@ object txt {
   }
 
   implicit class TxtStringContext(sc: StringContext) {
-    def txt(expressions: String*): String = macro contextual.Macros.contextual[TxtParser.type]
+    val txt = Prefix(TxtParser, sc)
   }
 }

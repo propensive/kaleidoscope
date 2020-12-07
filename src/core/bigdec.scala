@@ -18,8 +18,6 @@ package kaleidoscope
 
 import contextual._
 
-import language.experimental.macros
-
 object bigDecimal {
   object BigDecimalParser extends Verifier[BigDecimal] {
     def check(string: String): Either[(Int, String), BigDecimal] =
@@ -28,7 +26,7 @@ object bigDecimal {
   }
 
   implicit class BigDecimalStringContext(sc: StringContext) {
-    def d(expressions: Nothing*): BigDecimal = macro contextual.Macros.contextual[BigDecimalParser.type]
+    val d = Prefix(BigDecimalParser, sc)
   }
 }
 
@@ -40,6 +38,6 @@ object bigInt {
   }
 
   implicit class BigIntStringContext(sc: StringContext) {
-    def i(expressions: Nothing*): BigInt = macro contextual.Macros.contextual[BigIntParser.type]
+    val i = Prefix(BigIntParser, sc)
   }
 }

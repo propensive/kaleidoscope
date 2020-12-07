@@ -18,8 +18,6 @@ package kaleidoscope
 
 import contextual._
 
-import language.experimental.macros
-
 object binary {
 
   object BinParser extends Interpolator {
@@ -70,6 +68,6 @@ object binary {
   }
 
   implicit class BinaryStringContext(sc: StringContext) {
-    def bin(expressions: Nothing*): BigInt = macro contextual.Macros.contextual[BinParser.type]
+    val bin = Prefix(BinParser, sc)
   }
 }

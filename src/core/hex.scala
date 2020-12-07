@@ -18,8 +18,6 @@ package kaleidoscope
 
 import contextual._
 
-import language.experimental.macros
-
 object hex {
 
   object HexParser extends Interpolator {
@@ -75,6 +73,6 @@ object hex {
   }
 
   implicit class HexStringContext(sc: StringContext) {
-    def hex(expressions: Nothing*): Array[Byte] = macro contextual.Macros.contextual[HexParser.type]
+    val hex = Prefix(HexParser, sc)
   }
 }

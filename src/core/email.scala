@@ -19,8 +19,6 @@ package kaleidoscope
 import contextual._
 import scala.util.matching._
 
-import language.experimental.macros
-
 object email {
   case class EmailAddress(address: String)
 
@@ -34,6 +32,6 @@ object email {
   }
 
   implicit class EmailStringContext(sc: StringContext) {
-    def email(expressions: Nothing*): EmailAddress = macro contextual.Macros.contextual[EmailParser.type]
+    val email = Prefix(EmailParser, sc)
   }
 }

@@ -20,8 +20,6 @@ import contextual._
 import javax.xml.xpath._
 import scala.util._
 
-import language.experimental.macros
-
 object xpath {
   object XpathParser extends Interpolator {
     case class ContextType() extends Context
@@ -50,6 +48,6 @@ object xpath {
   }
 
   implicit class XpathStringContext(sc: StringContext) {
-    def xpath(expressions: Nothing*): XPathExpression = macro contextual.Macros.contextual[XpathParser.type]
+    val xpath = Prefix(XpathParser, sc)
   }
 }

@@ -20,8 +20,6 @@ import contextual._
 import java.time.{LocalDate, LocalTime, LocalDateTime}
 import java.time.format.{DateTimeFormatter, DateTimeParseException}
 
-import language.experimental.macros
-
 object datetime {
   object DateParser extends Verifier[LocalDate] {
     def check(string: String): Either[(Int, String), LocalDate] = {
@@ -45,14 +43,14 @@ object datetime {
   }
 
   implicit class DateStringContext(sc: StringContext) {
-    def time(expressions: Nothing*): LocalDate = macro contextual.Macros.contextual[DateParser.type]
+    val date = Prefix(DateParser, sc)
   }
   
   implicit class TimeStringContext(sc: StringContext) {
-    def time(expressions: Nothing*): LocalTime = macro contextual.Macros.contextual[TimeParser.type]
+    val time = Prefix(TimeParser, sc)
   }
   
   implicit class DateTimeStringContext(sc: StringContext) {
-    def datetime(expressions: Nothing*): LocalDateTime = macro contextual.Macros.contextual[DateTimeParser.type]
+    val datetime = Prefix(DateTimeParser, sc)
   }
 }

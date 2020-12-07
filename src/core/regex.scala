@@ -20,8 +20,6 @@ import contextual._
 
 import java.util.regex._
 
-import language.experimental.macros
-
 object regex {
 
   object RegexParser extends Interpolator {
@@ -51,7 +49,7 @@ object regex {
   }
 
   implicit class RegexStringContext(sc: StringContext) {
-    def regex(expressions: Nothing*): Pattern = macro contextual.Macros.contextual[RegexParser.type]
+    val regex = Prefix(RegexParser, sc)
   }
 
 }
