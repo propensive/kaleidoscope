@@ -59,10 +59,13 @@ object Regex:
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extraction(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
   
-  private def matcher(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]], scrutinee: Expr[String])
-             (using quotes: Quotes): Expr[Option[Any]] =
+  private def matcher(pattern: Expr[String],
+                      groups: Expr[List[Int]],
+                      parts: Expr[Seq[String]],
+                      scrutinee: Expr[String])
+                     (using quotes: Quotes): Expr[Option[Any]] =
     import quotes.reflect.*
-    
+
     '{
       val matcher = Regex.pattern($pattern).matcher($scrutinee)
       if matcher.matches() then
@@ -74,6 +77,6 @@ object Regex:
   case class Simple(pattern: String):
     def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).matches
 
-  case class Extraction(pattern: String, matchedGroups: List[Int], parts: Seq[String]):
+  case class Extraction(pattern: String, groups: List[Int], parts: Seq[String]):
     inline def unapply(inline scrutinee: String): Option[Any] =
-      ${Regex.matcher('pattern, 'matchedGroups, 'parts, 'scrutinee)}
+      ${Regex.matcher('pattern, 'groups, 'parts, 'scrutinee)}

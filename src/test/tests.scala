@@ -16,10 +16,8 @@
 */
 package kaleidoscope
 
-import probably._
-import annotation.StaticAnnotation
-
-import kaleidoscope._
+import probably.*
+import kaleidoscope.*
 
 object Tests extends Suite("Kaleidoscope tests"):
 

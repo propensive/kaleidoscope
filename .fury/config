@@ -7,7 +7,9 @@
 #
 # For more information, please visit https://propensive.com/fury/
 #
-layerRef	QmeT91ZK6neYUjTK7osUfd4svBjPB8owaJXogjedZjf99S
+layerRef	QmPSzZTwGx1zB7zhUvTYb92EsZYpmq6jWPoySGdmRe6B59
 published	Some	url	fury://vent.dev/propensive/kaleidoscope
-		layerRef	QmfRGokzBvfxppMhxobEjnMEBFZQMEGUxwwdZvKhYwYWQe
+		version	2
+		layerRef	QmfJwmYjPrDAkskdHdZJj5o1ciBV3pzBGBBSzm67ecgrih
+		expiry	Some	1620932975780
 # vim: set noai ts=12 sw=12:
