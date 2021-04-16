@@ -4,7 +4,7 @@
 [<img src="https://img.shields.io/matrix/propensive.kaleidoscope:matrix.org?label=MATRIX&color=0dbd8b&style=for-the-badge" height="24">](https://app.element.io/#/room/#propensive.kaleidoscope:matrix.org)
 [<img src="https://img.shields.io/twitter/follow/propensive?color=%2300acee&label=TWITTER&style=for-the-badge" height="24">](https://twitter.com/propensive)
 [<img src="https://img.shields.io/maven-central/v/com.propensive/kaleidoscope-core_2.12?color=2465cd&style=for-the-badge" height="24">](https://search.maven.org/artifact/com.propensive/kaleidoscope-core_2.12)
-[<img src="https://img.shields.io/badge/vent-propensive%2Fkaleidoscope-f05662?style=for-the-badge" height="24">](https://vent.dev)
+[<img src="https://vent.dev/badge/propensive/kaleidoscope" height="24">](https://vent.dev/)
 
 <img src="/doc/images/github.png" valign="middle">
 
@@ -107,10 +107,10 @@ or imported into an existing layer with,
 ```
 fury layer import -i propensive/kaleidoscope
 ```
-A binary is available on Maven Central as `com.propensive:kaleidoscope-core_<scala-version>:0.4.0`. This may be added
+A binary is available on Maven Central as `com.propensive:kaleidoscope-core_<scala-version>:0.5.0`. This may be added
 to an [sbt](https://www.scala-sbt.org/) build with:
 ```
-libraryDependencies += "com.propensive" %% "kaleidoscope-core" % "0.4.0"
+libraryDependencies += "com.propensive" %% "kaleidoscope-core" % "0.5.0"
 ```
 
 ## Contributing
@@ -134,5 +134,5 @@ training is available from [Propensive O&Uuml;](https://propensive.com/).
 
 ## License
 
-Kaleidoscope is copyright &copy; 2018-20 Jon Pretty & Propensive O&Uuml;, and is made available under the
+Kaleidoscope is copyright &copy; 2018-21 Jon Pretty & Propensive O&Uuml;, and is made available under the
 [Apache 2.0 License](/license.md).
