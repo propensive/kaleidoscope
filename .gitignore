@@ -3,7 +3,6 @@
 *.swp
 *.swo
 .bloop/
-.sbt
 .fury
 .idea
 *~

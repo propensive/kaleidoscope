@@ -4,7 +4,7 @@
 [<img src="https://img.shields.io/matrix/propensive.kaleidoscope:matrix.org?label=MATRIX&color=0dbd8b&style=for-the-badge" height="24">](https://app.element.io/#/room/#propensive.kaleidoscope:matrix.org)
 [<img src="https://img.shields.io/twitter/follow/propensive?color=%2300acee&label=TWITTER&style=for-the-badge" height="24">](https://twitter.com/propensive)
 [<img src="https://img.shields.io/maven-central/v/com.propensive/kaleidoscope-core_2.12?color=2465cd&style=for-the-badge" height="24">](https://search.maven.org/artifact/com.propensive/kaleidoscope-core_2.12)
-[<img src="https://img.shields.io/badge/vent-propensive%2Fkaleidoscope-f05662?style=for-the-badge" height="24">](https://vent.dev)
+[<img src="https://vent.dev/badge/propensive/kaleidoscope" height="24">](https://vent.dev/)
 
 <img src="/doc/images/github.png" valign="middle">
 
@@ -24,24 +24,22 @@ Kaleidoscope is a small library which provides pattern matching using regular ex
 
 To use Kaleidoscope, first import its package,
 ```scala
-import kaleidoscope._
+import kaleidoscope.*
 ```
 
 and you can then use a Kaleidoscope regular expression—a string prefixed with
 the letter `r`—anywhere you can use a pattern in Scala. For example,
 ```scala
-path match {
+path match
   case r"/images/.*" => println("image")
   case r"/styles/.*" => println("stylesheet")
-  case _ => println("something else")
-}
+  case _             => println("something else")
 ```
 or,
 ```scala
-email match {
+email match
   case r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,6}$$" => Some(email)
-  case _ => None
-}
+  case _                                            => None
 ```
 
 Such patterns will either match or not, however should they match, it is
@@ -55,13 +53,12 @@ to extract to, which in standard Scala syntax, is written either as
 
 Here is an example:
 ```scala
-path match {
-  case r"/images/${img}@(.*)" => Image(img)
+path match
+  case r"/images/${img}@(.*)"  => Image(img)
   case r"/styles/$styles@(.*)" => Stylesheet(styles)
-}
 ```
 
-or as an extractor on a `val`, like so,
+or as an extractor on a `val`, like so (using the Scala REPL):
 ```scala
 val r"^[a-z0-9._%+-]+@$domain@([a-z0-9.-]+\.$tld@([a-z]{2,6})$$" = "test@example.com"
 > domain: String = "example.com"
@@ -107,10 +104,10 @@ or imported into an existing layer with,
 ```
 fury layer import -i propensive/kaleidoscope
 ```
-A binary is available on Maven Central as `com.propensive:kaleidoscope-core_<scala-version>:0.4.0`. This may be added
+A binary is available on Maven Central as `com.propensive:kaleidoscope-core_<scala-version>:0.5.0`. This may be added
 to an [sbt](https://www.scala-sbt.org/) build with:
 ```
-libraryDependencies += "com.propensive" %% "kaleidoscope-core" % "0.4.0"
+libraryDependencies += "com.propensive" %% "kaleidoscope-core" % "0.5.0"
 ```
 
 ## Contributing
@@ -134,5 +131,5 @@ training is available from [Propensive O&Uuml;](https://propensive.com/).
 
 ## License
 
-Kaleidoscope is copyright &copy; 2018-20 Jon Pretty & Propensive O&Uuml;, and is made available under the
+Kaleidoscope is copyright &copy; 2018-21 Jon Pretty & Propensive O&Uuml;, and is made available under the
 [Apache 2.0 License](/license.md).
