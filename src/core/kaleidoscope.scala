@@ -57,26 +57,44 @@ object Regex:
     catch case e: PatternSyntaxException => report.error(s"kaleidoscope: ${e.getDescription} in pattern")
     
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
-    else '{Regex.Extraction(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
+    else if parts.length == 2 then '{Regex.ExtractOne(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
+    else '{Regex.ExtractMany(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
   
-  private def matcher(pattern: Expr[String],
+  private def matchMany(pattern: Expr[String],
                       groups: Expr[List[Int]],
                       parts: Expr[Seq[String]],
                       scrutinee: Expr[String])
-                     (using quotes: Quotes): Expr[Option[Any]] =
+                     (using quotes: Quotes): Expr[Option[Tuple]] =
     import quotes.reflect.*
 
     '{
       val matcher = Regex.pattern($pattern).matcher($scrutinee)
       if matcher.matches() then
-        val matches = (1 until $groups.length ).to(Array).map { idx => matcher.group($groups(idx - 1) + 1) }
-        Some(if matches.size == 1 then matches.head else Tuple.fromArray(matches))
+        Some(Tuple.fromArray(Array.range(1, $groups.length).map { idx => matcher.group($groups(idx - 1) + 1) }))
       else None
     }
 
+  private def matchOne(pattern: Expr[String],
+                      groups: Expr[List[Int]],
+                      parts: Expr[Seq[String]],
+                      scrutinee: Expr[String])
+                     (using quotes: Quotes): Expr[Option[String]] =
+    import quotes.reflect.*
+
+    '{
+      val matcher = Regex.pattern($pattern).matcher($scrutinee)
+      if matcher.matches() then
+        val matches = (1 until $groups.length).to(Array).map { idx => matcher.group($groups(idx - 1) + 1) }
+        Some(matches.head)
+      else None
+    }
   case class Simple(pattern: String):
     def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).matches
 
-  case class Extraction(pattern: String, groups: List[Int], parts: Seq[String]):
-    inline def unapply(inline scrutinee: String): Option[Any] =
-      ${Regex.matcher('pattern, 'groups, 'parts, 'scrutinee)}
+  case class ExtractOne(pattern: String, groups: List[Int], parts: Seq[String]):
+    transparent inline def unapply(inline scrutinee: String): Option[Any] =
+      ${Regex.matchOne('pattern, 'groups, 'parts, 'scrutinee)}
+  
+  case class ExtractMany(pattern: String, groups: List[Int], parts: Seq[String]):
+    transparent inline def unapply(inline scrutinee: String): Option[Tuple] =
+      ${Regex.matchMany('pattern, 'groups, 'parts, 'scrutinee)}
