@@ -31,11 +31,11 @@ object Tests extends Suite("Kaleidoscope tests"):
     }.assert(_ == 2)
 
     test("extract one word") {
-      "hello world" match { case r"$first@(hello) world" => first }
+      "hello world" match { case r"$first@(hello) world" => first: String }
     }.assert(_ == "hello")
 
     test("extract a nested capture group") {
-      "hello world" match { case r"(($first@(hello)) world)" => first }
+      "hello world" match { case r"(($first@(hello)) world)" => first: String }
     }.assert(_ == "hello")
 
     test("extract words") {
