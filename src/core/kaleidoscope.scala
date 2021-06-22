@@ -21,15 +21,24 @@ import java.util.concurrent.ConcurrentHashMap
 
 import scala.quoted.*
 
+case class Regex(pattern: String)
+
 extension (inline sc: StringContext)
   transparent inline def r: Any = ${Regex.extractor('{sc})}
+
+extension (sc: StringContext)
+  def r(args: String*): Regex = Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
+
+extension (value: String)
+  def rcut(delimiter: Regex): IArray[String] = rcut(delimiter, 0)
+  def rcut(delimiter: Regex, limit: Int): IArray[String] = IArray.from(value.split(delimiter.pattern, limit))
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
   
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile)
 
-  def extractor(sc: Expr[StringContext])(using quotes: Quotes): Expr[Any] =
+  def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     import quotes.reflect.*
     val parts = sc.value.get.parts
 
@@ -69,7 +78,7 @@ object Regex:
                       groups: Expr[List[Int]],
                       parts: Expr[Seq[String]],
                       scrutinee: Expr[String])
-                     (using quotes: Quotes): Expr[Extractor] =
+                     (using Quotes): Expr[Extractor] =
     import quotes.reflect.*
 
     '{
@@ -80,10 +89,10 @@ object Regex:
     }
 
   private def matchOne(pattern: Expr[String],
-                      groups: Expr[List[Int]],
-                      parts: Expr[Seq[String]],
-                      scrutinee: Expr[String])
-                     (using quotes: Quotes): Expr[Option[String]] =
+                       groups: Expr[List[Int]],
+                       parts: Expr[Seq[String]],
+                       scrutinee: Expr[String])
+                      (using Quotes): Expr[Option[String]] =
     import quotes.reflect.*
 
     '{
