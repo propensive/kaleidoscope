@@ -1,19 +1,19 @@
 /*
-
-    Kaleidoscope, version 0.5.0. Copyright 2018-20 Jon Pretty, Propensive OÜ.
+    Kaleidoscope, version 0.5.0. Copyright 2018-21 Jon Pretty, Propensive OÜ.
 
     The primary distribution site is: https://propensive.com/
 
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in
-    compliance with the License. You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+    file except in compliance with the License. You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software distributed under the License is
-    distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and limitations under the License.
-
+    Unless required by applicable law or agreed to in writing, software distributed under the
+    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+    either express or implied. See the License for the specific language governing permissions
+    and limitations under the License.
 */
+
 package kaleidoscope
 
 import java.util.regex.*
@@ -27,11 +27,14 @@ extension (inline sc: StringContext)
   transparent inline def r: Any = ${Regex.extractor('{sc})}
 
 extension (sc: StringContext)
-  def r(args: String*): Regex = Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
+  def r(args: String*): Regex =
+    Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
 
 extension (value: String)
   def rcut(delimiter: Regex): IArray[String] = rcut(delimiter, 0)
-  def rcut(delimiter: Regex, limit: Int): IArray[String] = IArray.from(value.split(delimiter.pattern, limit))
+  
+  def rcut(delimiter: Regex, limit: Int): IArray[String] =
+    IArray.from(value.split(delimiter.pattern, limit))
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
@@ -43,14 +46,15 @@ object Regex:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val (_, count) = part.tails.map { tail => tail.take(1) -> tail.take(3).drop(1) }.foldLeft((false, 0)) {
-        case ((esc, cnt), ("(", _)) if esc                               => (false, cnt)
-        case ((_, cnt), ("(", "?<"))                                     => (false, cnt + 1)
-        case ((_, cnt), ("(", maybeGroup)) if maybeGroup.startsWith("?") => (false, cnt)
-        case ((_, cnt), ("(", _))                                        => (false, cnt + 1)
-        case ((esc, cnt), ("\\", _))                                     => (!esc, cnt)
-        case ((_, cnt), _)                                               => (false, cnt)
-      }
+      val (_, count) = part.tails.map { tail =>
+        tail.take(1) -> tail.take(3).drop(1) }.foldLeft((false, 0)) {
+          case ((esc, cnt), ("(", _)) if esc                 => (false, cnt)
+          case ((_, cnt), ("(", "?<"))                       => (false, cnt + 1)
+          case ((_, cnt), ("(", opt)) if opt.startsWith("?") => (false, cnt)
+          case ((_, cnt), ("(", _))                          => (false, cnt + 1)
+          case ((esc, cnt), ("\\", _))                       => (!esc, cnt)
+          case ((_, cnt), _)                                 => (false, cnt)
+        }
       
       count
 
@@ -62,8 +66,8 @@ object Regex:
       then report.error("kaleidoscope: variable must be bound to a capturing group")
     }
     
-    try Pattern.compile(pattern)
-    catch case e: PatternSyntaxException => report.error(s"kaleidoscope: ${e.getDescription} in pattern")
+    try Pattern.compile(pattern) catch case e: PatternSyntaxException =>
+      report.error(s"kaleidoscope: ${e.getDescription} in pattern")
     
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
@@ -74,34 +78,34 @@ object Regex:
     def drop(n: Int): scala.Seq[String] = xs.drop(n).to(Seq)
     def toSeq: scala.Seq[String] = xs.to(Seq)
 
-  private def extract(pattern: Expr[String],
-                      groups: Expr[List[Int]],
-                      parts: Expr[Seq[String]],
-                      scrutinee: Expr[String])
+  private def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
+                          scrutinee: Expr[String])
                      (using Quotes): Expr[Extractor] =
     import quotes.reflect.*
 
     '{
       val matcher = Regex.pattern($pattern).matcher($scrutinee)
       if matcher.matches() then
-        Extractor(IArray.range(1, $groups.length).map { idx => matcher.group($groups(idx - 1) + 1) })
+        Extractor(IArray.range(1, $groups.length).map { i => matcher.group($groups(i - 1) + 1) })
       else null
     }
 
-  private def matchOne(pattern: Expr[String],
-                       groups: Expr[List[Int]],
-                       parts: Expr[Seq[String]],
-                       scrutinee: Expr[String])
+  private def matchOne(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
+                           scrutinee: Expr[String])
                       (using Quotes): Expr[Option[String]] =
     import quotes.reflect.*
 
     '{
       val matcher = Regex.pattern($pattern).matcher($scrutinee)
       if matcher.matches() then
-        val matches = (1 until $groups.length).to(Array).map { idx => matcher.group($groups(idx - 1) + 1) }
+        val matches = (1 until $groups.length).to(Array).map { i =>
+          matcher.group($groups(i - 1) + 1)
+        }
+        
         Some(matches.head)
       else None
     }
+
   case class Simple(pattern: String):
     def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).matches
 
