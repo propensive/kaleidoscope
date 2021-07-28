@@ -16,10 +16,12 @@
 
 package kaleidoscope
 
-import java.util.regex.*
-import java.util.concurrent.ConcurrentHashMap
+import rudiments.*
 
 import scala.quoted.*
+
+import java.util.regex.*
+import java.util.concurrent.ConcurrentHashMap
 
 case class Regex(pattern: String)
 
@@ -34,12 +36,12 @@ extension (value: String)
   def rcut(delimiter: Regex): IArray[String] = rcut(delimiter, 0)
   
   def rcut(delimiter: Regex, limit: Int): IArray[String] =
-    IArray.from(value.split(delimiter.pattern, limit))
+    IArray.from(value.split(delimiter.pattern, limit).nn.map(_.nn))
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
   
-  def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile)
+  def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     import quotes.reflect.*
@@ -78,16 +80,22 @@ object Regex:
     def drop(n: Int): scala.Seq[String] = xs.drop(n).to(Seq)
     def toSeq: scala.Seq[String] = xs.to(Seq)
 
+  object NoMatch extends Extractor(IArray()):
+    override def lengthCompare(len: Int): Int = -1
+
   private def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
                           scrutinee: Expr[String])
                      (using Quotes): Expr[Extractor] =
     import quotes.reflect.*
 
     '{
-      val matcher = Regex.pattern($pattern).matcher($scrutinee)
-      if matcher.matches() then
-        Extractor(IArray.range(1, $groups.length).map { i => matcher.group($groups(i - 1) + 1) })
-      else null
+      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
+      
+      if matcher.matches()
+      then Extractor(IArray.range(1, $groups.size).map { i =>
+        matcher.group($groups(i - 1) + 1).nn
+      })
+      else NoMatch
     }
 
   private def matchOne(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
@@ -96,18 +104,18 @@ object Regex:
     import quotes.reflect.*
 
     '{
-      val matcher = Regex.pattern($pattern).matcher($scrutinee)
+      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       if matcher.matches() then
         val matches = (1 until $groups.length).to(Array).map { i =>
           matcher.group($groups(i - 1) + 1)
         }
         
-        Some(matches.head)
+        Some(matches.head.nn)
       else None
     }
 
   case class Simple(pattern: String):
-    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).matches
+    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
 
   case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
     transparent inline def unapplySeq(inline scrutinee: String): Extractor =
