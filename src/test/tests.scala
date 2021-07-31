@@ -20,7 +20,6 @@ import probably.*
 import kaleidoscope.*
 
 object Tests extends Suite("Kaleidoscope tests"):
-
   def run(using Runner): Unit =
     test("simple match") {
       "hello world" match { case r"hello world" => 1 }
