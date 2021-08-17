@@ -1,13 +1,10 @@
-[<img alt="GitHub Workflow" src="https://img.shields.io/github/workflow/status/propensive/kaleidoscope/Build/main?style=for-the-badge" height="24">](https://github.com/propensive/kaleidoscope/actions)
-[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/CHCPjERybv)
-[<img src="https://img.shields.io/maven-central/v/com.propensive/kaleidoscope-core_2.12?color=2465cd&style=for-the-badge" height="24">](https://search.maven.org/artifact/com.propensive/kaleidoscope-core_2.12)
-[<img src="https://vent.dev/badge/propensive/kaleidoscope" height="24">](https://vent.dev/)
-
 <img src="/doc/images/github.png" valign="middle">
 
 # Kaleidoscope
 
-Kaleidoscope is a small library which provides pattern matching using regular expressions, and extraction of capturing groups into values. In particular, patterns are written inline, and do not need to be predefined.
+Kaleidoscope is a small library which provides pattern matching using regular
+expressions, and extraction of capturing groups into values. In particular,
+patterns are written inline, and do not need to be predefined.
 
 ## Features
 
