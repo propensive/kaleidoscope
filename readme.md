@@ -109,14 +109,19 @@ We suggest that all contributors read the [Contributing Guide](/contributing.md)
 contributing to Kaleidoscope easier.
 
 Please __do not__ contact project maintainers privately with questions, as other users cannot then benefit from
-the answers.
+answers given in private.
 
 ## Author
 
-Kaleidoscope was designed and developed by [Jon Pretty](https://twitter.com/propensive), and commercial support and
-training is available from [Propensive O&Uuml;](https://propensive.com/).
+Kaleidoscope was designed and developed by Jon Pretty, and commercial support and training is available from
+[Propensive O&Uuml;](https://propensive.com/).
 
 
+
+## Name
+
+Kaleidoscope is named after the optical instrument which shows pretty patterns to its user, while
+the library also works closely with patterns.
 
 ## License
 
