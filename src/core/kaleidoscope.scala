@@ -65,11 +65,11 @@ object Regex:
     
     parts.tail.foreach { p =>
       if p.length < 2 || p.head != '@' || p(1) != '('
-      then report.throwError("kaleidoscope: variable must be bound to a capturing group")
+      then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
     }
     
     try Pattern.compile(pattern) catch case e: PatternSyntaxException =>
-      report.throwError(s"kaleidoscope: ${e.getDescription} in pattern")
+      report.errorAndAbort(s"kaleidoscope: ${e.getDescription} in pattern")
     
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
