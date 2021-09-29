@@ -18,6 +18,8 @@ package kaleidoscope
 
 import probably.*
 
+import unsafeExceptions.canThrowAny
+
 object Tests extends Suite("Kaleidoscope tests"):
   def run(using Runner): Unit =
     test("simple match") {
