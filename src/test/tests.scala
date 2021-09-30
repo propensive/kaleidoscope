@@ -39,9 +39,8 @@ object Tests extends Suite("Kaleidoscope tests"):
     }.assert(_ == "hello")
 
     test("extract words") {
-    //   "hello world" match
-    //     case r"$first@(hello) $second@(world)" => List(first, second)
-      throw new Exception("This crashes the compiler")
+      "hello world" match
+        case r"$first@(hello) $second@(world)" => List(first, second)
     }.assert(_ == List("hello", "world"))
     
     test("skipped capture group") {
@@ -57,9 +56,8 @@ object Tests extends Suite("Kaleidoscope tests"):
     }.assert(_ == "anyval")
     
     test("email regex") {
-    //   val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
-    //       "test@example.com"
+      val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
+          "test@example.com"
       
-    //   List(prefix, domain, tld)
-      throw new Exception("This crashes the compiler")
+      List(prefix, domain, tld)
     }.assert(_ == List("test", "example", "com"))
