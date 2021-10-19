@@ -79,6 +79,16 @@ Kaleidoscope currently has no support for optional or repeated capturing
 groups.
 
 
+## Related Projects
+
+The following _Niveau_ libraries are dependencies of _Kaleidoscope_:
+
+[![Rudiments](https://github.com/propensive/rudiments/raw/main/doc/images/128x128.png)](https://github.com/propensive/rudiments/) &nbsp;
+
+The following _Niveau_ libraries are dependents of _Kaleidoscope_:
+
+[![Gastronomy](https://github.com/propensive/gastronomy/raw/main/doc/images/128x128.png)](https://github.com/propensive/gastronomy/) &nbsp;
+
 ## Status
 
 Kaleidoscope is classified as __maturescent__. Propensive defines the following five stability levels for open-source projects:
