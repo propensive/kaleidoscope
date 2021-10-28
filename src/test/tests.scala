@@ -25,44 +25,44 @@ import unsafeExceptions.canThrowAny
 
 given Log(Everything |-> Stdout)
 
-object Tests extends Suite(str"Kaleidoscope tests"):
+object Tests extends Suite(t"Kaleidoscope tests"):
   def run(using Runner): Unit =
-    test(str"simple match") {
+    test(t"simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)
 
-    test(str"basic extractor") {
-      str"hello world" match { case r"(hello world)" => 2 }
+    test(t"basic extractor") {
+      t"hello world" match { case r"(hello world)" => 2 }
     }.assert(_ == 2)
 
-    test(str"extract one word") {
-      str"hello world" match { case r"$first@(hello) world" => first.show }
-    }.check(_ == str"hello")
+    test(t"extract one word") {
+      t"hello world" match { case r"$first@(hello) world" => first.show }
+    }.check(_ == t"hello")
 
-    test(str"extract a nested capture group") {
-      str"hello world" match { case r"(($first@(hello)) world)" => first.show }
-    }.check(_ == str"hello")
+    test(t"extract a nested capture group") {
+      t"hello world" match { case r"(($first@(hello)) world)" => first.show }
+    }.check(_ == t"hello")
 
-    test(str"extract words") {
-      str"hello world" match
+    test(t"extract words") {
+      t"hello world" match
         case r"$first@(hello) $second@(world)" => List(first, second)
-    }.assert(_ == List(str"hello", str"world"))
+    }.assert(_ == List(t"hello", t"world"))
     
-    test(str"skipped capture group") {
-      str"hello world" match { case r"(hello) $second@(world)" => second.show }
-    }.check(_ == str"world")
+    test(t"skipped capture group") {
+      t"hello world" match { case r"(hello) $second@(world)" => second.show }
+    }.check(_ == t"world")
 
-    test(str"skipped capture group 2") {
-      str"1 2 3 4 5" match { case r"1 $two@(2) 3 4 5" => two.show }
-    }.check(_ == str"2")
+    test(t"skipped capture group 2") {
+      t"1 2 3 4 5" match { case r"1 $two@(2) 3 4 5" => two.show }
+    }.check(_ == t"2")
 
-    test(str"nested unbound capture group") {
-      str"anyval" match { case r"$x@(any(val))" => x.show }
-    }.check(_ == str"anyval")
+    test(t"nested unbound capture group") {
+      t"anyval" match { case r"$x@(any(val))" => x.show }
+    }.check(_ == t"anyval")
     
-    test(str"email regex") {
+    test(t"email regex") {
       val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
-          str"test@example.com"
+          t"test@example.com"
       
       List(prefix, domain, tld)
-    }.assert(_ == List(str"test", str"example", str"com"))
+    }.assert(_ == List(t"test", t"example", t"com"))
