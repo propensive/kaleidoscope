@@ -17,47 +17,52 @@
 package kaleidoscope
 
 import probably.*
+import rudiments.*
+import gossamer.*
+import eucalyptus.*
 
 import unsafeExceptions.canThrowAny
 
-object Tests extends Suite("Kaleidoscope tests"):
+given Log(Everything |-> Stdout)
+
+object Tests extends Suite(str"Kaleidoscope tests"):
   def run(using Runner): Unit =
-    test("simple match") {
+    test(str"simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)
 
-    test("basic extractor") {
-      "hello world" match { case r"(hello world)" => 2 }
+    test(str"basic extractor") {
+      str"hello world" match { case r"(hello world)" => 2 }
     }.assert(_ == 2)
 
-    test("extract one word") {
-      "hello world" match { case r"$first@(hello) world" => first: String }
-    }.assert(_ == "hello")
+    test(str"extract one word") {
+      str"hello world" match { case r"$first@(hello) world" => first.show }
+    }.check(_ == str"hello")
 
-    test("extract a nested capture group") {
-      "hello world" match { case r"(($first@(hello)) world)" => first: String }
-    }.assert(_ == "hello")
+    test(str"extract a nested capture group") {
+      str"hello world" match { case r"(($first@(hello)) world)" => first.show }
+    }.check(_ == str"hello")
 
-    test("extract words") {
-      "hello world" match
+    test(str"extract words") {
+      str"hello world" match
         case r"$first@(hello) $second@(world)" => List(first, second)
-    }.assert(_ == List("hello", "world"))
+    }.assert(_ == List(str"hello", str"world"))
     
-    test("skipped capture group") {
-      "hello world" match { case r"(hello) $second@(world)" => second }
-    }.assert(_ == "world")
+    test(str"skipped capture group") {
+      str"hello world" match { case r"(hello) $second@(world)" => second.show }
+    }.check(_ == str"world")
 
-    test("skipped capture group 2") {
-      "1 2 3 4 5" match { case r"1 $two@(2) 3 4 5" => two }
-    }.assert(_ == "2")
+    test(str"skipped capture group 2") {
+      str"1 2 3 4 5" match { case r"1 $two@(2) 3 4 5" => two.show }
+    }.check(_ == str"2")
 
-    test("nested unbound capture group") {
-      "anyval" match { case r"$x@(any(val))" => x }
-    }.assert(_ == "anyval")
+    test(str"nested unbound capture group") {
+      str"anyval" match { case r"$x@(any(val))" => x.show }
+    }.check(_ == str"anyval")
     
-    test("email regex") {
+    test(str"email regex") {
       val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
-          "test@example.com"
+          str"test@example.com"
       
       List(prefix, domain, tld)
-    }.assert(_ == List("test", "example", "com"))
+    }.assert(_ == List(str"test", str"example", str"com"))
