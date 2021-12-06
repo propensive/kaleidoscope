@@ -1,0 +1,31 @@
+{
+  "imports": ["gossamer/build.ire"],
+  "config": {
+    "scalac": {
+      "version": "3.1.1-RC1-bin-SNAPSHOT",
+      "options": [
+        "-language:experimental.erasedDefinitions",
+        "-language:experimental.fewerBraces",
+        "-language:experimental.saferExceptions",
+        "-Wunused:all",
+        "-O", "-deprecation",
+        "-O", "-feature",
+        "-O", "-new-syntax",
+        "-Yrequire-targetName",
+        "-Ysafe-init",
+        "-Ycheck-all-patmat",
+        "-Yexplicit-nulls"
+      ]
+    }
+  },
+  "modules": [
+    {
+      "name": "Kaleidoscope",
+      "id": "kaleidoscope/core",
+      "links": ["gossamer/core"],
+      "sources": ["src/core"],
+      "version": "0.1.0",
+      "docs": ["doc"]
+    }
+  ]
+}
