@@ -36,7 +36,7 @@ extension (value: String)
   def rcut(delimiter: Regex): IArray[String] = rcut(delimiter, 0)
   
   def rcut(delimiter: Regex, limit: Int): IArray[String] =
-    IArray.from(value.split(delimiter.pattern, limit).nn.map(_.nn))
+    value.split(delimiter.pattern, limit).nn.map(_.nn).unsafeImmutable
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
@@ -48,25 +48,25 @@ object Regex:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val (_, count) = part.tails.map { tail =>
-        tail.take(1) -> tail.take(3).drop(1) }.foldLeft((false, 0)) {
-          case ((esc, cnt), ("(", _)) if esc                 => (false, cnt)
-          case ((_, cnt), ("(", "?<"))                       => (false, cnt + 1)
-          case ((_, cnt), ("(", opt)) if opt.startsWith("?") => (false, cnt)
-          case ((_, cnt), ("(", _))                          => (false, cnt + 1)
-          case ((esc, cnt), ("\\", _))                       => (!esc, cnt)
-          case ((_, cnt), _)                                 => (false, cnt)
-        }
+      val (_, count) = part.toCharArray.nn.unsafeImmutable.tails.map:
+        tail => tail(1) -> tail.take(3).drop(1).to(List)
+      .foldLeft((false, 0)):
+        case ((esc, cnt), ('(', _)) if esc     => (false, cnt)
+        case ((_, cnt), ('(', List('?', '<'))) => (false, cnt + 1)
+        case ((_, cnt), ('(', '?' :: _))       => (false, cnt)
+        case ((_, cnt), ('(', _))              => (false, cnt + 1)
+        case ((esc, cnt), ('\\', _))           => (!esc, cnt)
+        case ((_, cnt), _)                     => (false, cnt)
       
       count
 
     val groups: List[Int] = parts.map(countGroups).inits.map(_.sum).to(List).reverse.tail
-    val pattern = (parts.head +: parts.tail.map(_.tail)).mkString
+    val pattern = (parts.head +: parts.tail.map(_.substring(1).nn)).mkString
     
-    parts.tail.foreach { p =>
-      if p.length < 2 || p.head != '@' || p(1) != '('
-      then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
-    }
+    parts.tail.foreach:
+      p =>
+        if p.length < 2 || p.charAt(0) != '@' || p.charAt(1) != '('
+        then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
     
     try Pattern.compile(pattern) catch case e: PatternSyntaxException =>
       report.errorAndAbort(s"kaleidoscope: ${e.getDescription} in pattern")
@@ -92,9 +92,9 @@ object Regex:
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       
       if matcher.matches()
-      then Extractor(IArray.range(1, $groups.size).map { i =>
-        matcher.group($groups(i - 1) + 1).nn
-      })
+      then Extractor(IArray.range(1, $groups.size).map:
+        i => matcher.group($groups(i - 1) + 1).nn
+      )
       else NoMatch
     }
 
@@ -106,9 +106,8 @@ object Regex:
     '{
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       if matcher.matches() then
-        val matches = (1 until $groups.length).to(Array).map { i =>
-          matcher.group($groups(i - 1) + 1)
-        }
+        val matches = (1 until $groups.length).to(Array).map:
+          i => matcher.group($groups(i - 1) + 1)
         
         Some(matches.head.nn)
       else None
