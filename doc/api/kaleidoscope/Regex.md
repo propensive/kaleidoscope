@@ -1,0 +1,1 @@
+object providing methods to assist with pattern matching on `:Text` values with regular expressions
