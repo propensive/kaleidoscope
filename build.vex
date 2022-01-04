@@ -1,5 +1,5 @@
 {
-  "imports": ["../gossamer/build.ire"],
+  "imports": ["../gossamer/build.vex"],
   "config": {
     "scalac": {
       "version": "3.1.2-RC1-bin-SNAPSHOT",
