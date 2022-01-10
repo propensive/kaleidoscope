@@ -48,15 +48,15 @@ object Regex:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val (_, count) = part.toCharArray.nn.unsafeImmutable.tails.map:
-        tail => tail(1) -> tail.take(3).drop(1).to(List)
-      .foldLeft((false, 0)):
-        case ((esc, cnt), ('(', _)) if esc     => (false, cnt)
-        case ((_, cnt), ('(', List('?', '<'))) => (false, cnt + 1)
-        case ((_, cnt), ('(', '?' :: _))       => (false, cnt)
-        case ((_, cnt), ('(', _))              => (false, cnt + 1)
-        case ((esc, cnt), ('\\', _))           => (!esc, cnt)
-        case ((_, cnt), _)                     => (false, cnt)
+      val (_, count) = part.tails.map { tail =>
+        tail.take(1) -> tail.take(3).drop(1) }.foldLeft((false, 0)) {
+          case ((esc, cnt), ("(", _)) if esc                 => (false, cnt)
+          case ((_, cnt), ("(", "?<"))                       => (false, cnt + 1)
+          case ((_, cnt), ("(", opt)) if opt.startsWith("?") => (false, cnt)
+          case ((_, cnt), ("(", _))                          => (false, cnt + 1)
+          case ((esc, cnt), ("\\", _))                       => (!esc, cnt)
+          case ((_, cnt), _)                                 => (false, cnt)
+        }
       
       count
 
