@@ -1,5 +1,5 @@
 {
-  "imports": ["../gossamer/build.vex"],
+  "imports": ["../rudiments/build.vex"],
   "config": {
     "scalac": {
       "version": "3.1.2-RC1-bin-SNAPSHOT",
@@ -41,7 +41,7 @@
     {
       "name": "Kaleidoscope",
       "id": "kaleidoscope/core",
-      "links": ["gossamer/core"],
+      "links": ["rudiments/core"],
       "sources": ["src/core"],
       "version": "0.2.0",
       "docs": ["doc"]
