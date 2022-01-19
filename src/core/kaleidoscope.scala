@@ -17,6 +17,7 @@
 package kaleidoscope
 
 import rudiments.*
+import gossamer.*
 
 import scala.quoted.*
 
@@ -32,15 +33,12 @@ extension (sc: StringContext)
   def r(args: String*): Regex =
     Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
 
-extension (value: String)
-  def rcut(delimiter: Regex): IArray[String] = rcut(delimiter, 0)
-  
-  def rcut(delimiter: Regex, limit: Int): IArray[String] =
-    value.split(delimiter.pattern, limit).nn.map(_.nn).unsafeImmutable
-
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
-  
+
+  given Cuttable[Text, Regex] = (text, regex, limit) =>
+    List(text.s.split(regex.pattern, limit).nn.map(_.nn).map(Text(_))*)
+
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
