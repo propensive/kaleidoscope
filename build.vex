@@ -1,8 +1,13 @@
 {
   "repos": [
-    { "base": "../gossamer", "url": "https://github.com/propensive/gossamer" }
+    {
+      "base": "../gossamer",
+      "url": "https://github.com/propensive/gossamer"
+    }
   ],
-  "imports": ["../gossamer/build.vex"],
+  "imports": [
+    "../gossamer/build.vex"
+  ],
   "publishing": {
     "username": "propensive",
     "group": "com.propensive",
@@ -25,10 +30,16 @@
     {
       "name": "Kaleidoscope",
       "id": "kaleidoscope/core",
-      "links": ["gossamer/core"],
-      "sources": ["src/core"],
-      "version": "0.2.0",
-      "docs": ["doc"]
+      "links": [
+        "gossamer/core"
+      ],
+      "sources": [
+        "src/core"
+      ],
+      "version": "0.4.0",
+      "docs": [
+        "doc"
+      ]
     }
   ]
 }
