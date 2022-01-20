@@ -84,11 +84,11 @@ groups.
 
 The following _Niveau_ libraries are dependencies of _Kaleidoscope_:
 
-[![Rudiments](https://github.com/propensive/rudiments/raw/main/doc/images/128x128.png)](https://github.com/propensive/rudiments/) &nbsp;
+[![Gossamer](https://github.com/propensive/gossamer/raw/main/doc/images/128x128.png)](https://github.com/propensive/gossamer/) &nbsp;
 
 The following _Niveau_ libraries are dependents of _Kaleidoscope_:
 
-[![Gastronomy](https://github.com/propensive/gastronomy/raw/main/doc/images/128x128.png)](https://github.com/propensive/gastronomy/) &nbsp;
+[![Jovian](https://github.com/propensive/jovian/raw/main/doc/images/128x128.png)](https://github.com/propensive/jovian/) &nbsp;
 
 ## Status
 
@@ -100,7 +100,7 @@ Kaleidoscope is classified as __maturescent__. Propensive defines the following 
 - _dependable_: production-ready, subject to controlled ongoing maintenance and enhancement; tagged as version `1.0` or later
 - _adamantine_: proven, reliable and production-ready, with no further breaking changes ever anticipated
 
-Kaleidoscope is designed to be _small_. Its entire source code currently consists of 117 lines of code.
+Kaleidoscope is designed to be _small_. Its entire source code currently consists of 116 lines of code.
 
 ## Building
 
