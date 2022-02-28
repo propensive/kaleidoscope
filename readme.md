@@ -108,7 +108,7 @@ Kaleidoscope is designed to be _small_. Its entire source code currently consist
 
 ## Building
 
-Kaleidoscope can be built on Linux or Mac OS with Vex, by running the `irk` script in the root directory:
+Kaleidoscope can be built on Linux or Mac OS with Irk, by running the `irk` script in the root directory:
 ```sh
 ./irk
 ```
