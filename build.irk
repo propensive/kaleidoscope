@@ -6,7 +6,7 @@
     }
   ],
   "imports": [
-    "../gossamer/build.vex"
+    "../gossamer/build.irk"
   ],
   "publishing": {
     "username": "propensive",
