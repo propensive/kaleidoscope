@@ -17,6 +17,10 @@ patterns are written inline, and do not need to be predefined.
 - static verification of regular expression syntax
 
 
+## Availability
+
+The current latest release of Kaleidoscope is __0.4.0__.
+
 ## Getting Started
 
 To use Kaleidoscope, first import its package,
@@ -82,13 +86,13 @@ groups.
 
 ## Related Projects
 
-The following _Niveau_ libraries are dependencies of _Kaleidoscope_:
+The following _Scala One_ libraries are dependencies of _Kaleidoscope_:
 
 [![Gossamer](https://github.com/propensive/gossamer/raw/main/doc/images/128x128.png)](https://github.com/propensive/gossamer/) &nbsp;
 
-The following _Niveau_ libraries are dependents of _Kaleidoscope_:
+The following _Scala One_ libraries are dependents of _Kaleidoscope_:
 
-[![Jovian](https://github.com/propensive/jovian/raw/main/doc/images/128x128.png)](https://github.com/propensive/jovian/) &nbsp;
+[![Harlequin](https://github.com/propensive/harlequin/raw/main/doc/images/128x128.png)](https://github.com/propensive/harlequin/) &nbsp; [![Jovian](https://github.com/propensive/jovian/raw/main/doc/images/128x128.png)](https://github.com/propensive/jovian/) &nbsp;
 
 ## Status
 
