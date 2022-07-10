@@ -46,7 +46,7 @@ object Regex:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val (_, count) = part.tails.to(List).mtwin.map(_.take(1) -> _.slice(1, 3)).foldLeft(false -> 0):
+      val (_, count) = part.tails.to(List).map(_.show).mtwin.map(_.take(1) -> _.slice(1, 3)).foldLeft(false -> 0):
         case ((esc, cnt), (t"(", _)) if esc                  => (false, cnt)
         case ((_, cnt), (t"(", t"?<"))                       => (false, cnt + 1)
         case ((_, cnt), (t"(", opt)) if opt.startsWith(t"?") => (false, cnt)
