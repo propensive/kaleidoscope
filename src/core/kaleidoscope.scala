@@ -72,9 +72,9 @@ object Regex:
 
   class Extractor(xs: IArray[String]):
     def lengthCompare(len: Int): Int = if xs.length == len then 0 else -1
-    def apply(i: Int): String = xs(i)
-    def drop(n: Int): scala.Seq[String] = xs.drop(n).to(Seq)
-    def toSeq: scala.Seq[String] = xs.to(Seq)
+    def apply(i: Int): Text = Text(xs(i))
+    def drop(n: Int): scala.Seq[Text] = xs.drop(n).to(Seq).map(Text(_))
+    def toSeq: scala.Seq[Text] = xs.to(Seq).map(Text(_))
 
   object NoMatch extends Extractor(IArray()):
     override def lengthCompare(len: Int): Int = -1
