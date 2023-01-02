@@ -92,7 +92,7 @@ The following _Scala One_ libraries are dependencies of _Kaleidoscope_:
 
 The following _Scala One_ libraries are dependents of _Kaleidoscope_:
 
-[![Harlequin](https://github.com/propensive/harlequin/raw/main/doc/images/128x128.png)](https://github.com/propensive/harlequin/) &nbsp; [![Joviality](https://github.com/propensive/joviality/raw/main/doc/images/128x128.png)](https://github.com/propensive/joviality/) &nbsp; [![Temporaneous](https://github.com/propensive/temporaneous/raw/main/doc/images/128x128.png)](https://github.com/propensive/temporaneous/) &nbsp;
+[![Galilei](https://github.com/propensive/galilei/raw/main/doc/images/128x128.png)](https://github.com/propensive/galilei/) &nbsp; [![Harlequin](https://github.com/propensive/harlequin/raw/main/doc/images/128x128.png)](https://github.com/propensive/harlequin/) &nbsp; [![Temporaneous](https://github.com/propensive/temporaneous/raw/main/doc/images/128x128.png)](https://github.com/propensive/temporaneous/) &nbsp;
 
 ## Status
 
