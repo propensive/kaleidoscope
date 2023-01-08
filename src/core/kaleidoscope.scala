@@ -88,8 +88,8 @@ object Regex:
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       
       if matcher.matches()
-      then Extractor(IArray.range(1, $groups.size).map:
-        i => matcher.group($groups(i - 1) + 1).nn
+      then Extractor(IArray.range(1, $groups.size).map: i =>
+        matcher.group($groups(i - 1) + 1).nn
       )
       else NoMatch
     }
