@@ -68,7 +68,7 @@ val r"^[a-z0-9._%+-]+@$domain@([a-z0-9.-]+\.$tld@([a-z]{2,6})$$" = "test@example
 In addition, regular expressions will be checked at compile-time, and any
 issues will be reported then.
 
-## Escaping
+### Escaping
 
 Note that inside an extractor pattern string, whether it is single- (`r"..."`)
 or triple-quoted (`r"""..."""`), special characters, notably `\`, do not need
@@ -77,7 +77,7 @@ still necessary, however, to follow the regular expression escaping rules, for
 example, an extractor matching a single opening parenthesis would be written as
 `r"\("` or `r"""\("""`.
 
-## Limitations
+### Limitations
 
 Kaleidoscope currently has no support for optional or repeated capturing
 groups.
