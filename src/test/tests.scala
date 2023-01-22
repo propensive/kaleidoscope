@@ -26,7 +26,7 @@ import unsafeExceptions.canThrowAny
 given Log(Everything |-> Stdout)
 
 object Tests extends Suite(t"Kaleidoscope tests"):
-  def run(using Runner): Unit =
+  def run(): Unit =
     test(t"simple match") {
       "hello world" match { case r"hello world" => 1 }
     }.assert(_ == 1)
