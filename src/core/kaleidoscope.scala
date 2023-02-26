@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 case class Regex(pattern: String)
 
 extension (inline sc: StringContext)
-  transparent inline def r: Any = ${Regex.extractor('{sc})}
+  transparent inline def r: Any = ${KaleidoscopeMacros.extractor('{sc})}
 
 extension (sc: StringContext)
   def r(args: String*): Regex =
@@ -41,6 +41,23 @@ object Regex:
 
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
+  class Extractor(xs: IArray[String]):
+    def lengthCompare(len: Int): Int = if xs.length == len then 0 else -1
+    def apply(i: Int): Text = Text(xs(i))
+    def drop(n: Int): scala.Seq[Text] = xs.drop(n).to(Seq).map(Text(_))
+    def toSeq: scala.Seq[Text] = xs.to(Seq).map(Text(_))
+
+  object NoMatch extends Extractor(IArray()):
+    override def lengthCompare(len: Int): Int = -1
+
+  case class Simple(pattern: String):
+    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
+
+  case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
+    transparent inline def unapplySeq(inline scrutinee: String): Extractor =
+      ${KaleidoscopeMacros.extract('pattern, 'groups, 'parts, 'scrutinee)}
+
+object KaleidoscopeMacros:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     import quotes.reflect.*
     val parts = sc.value.get.parts
@@ -70,48 +87,18 @@ object Regex:
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
 
-  class Extractor(xs: IArray[String]):
-    def lengthCompare(len: Int): Int = if xs.length == len then 0 else -1
-    def apply(i: Int): Text = Text(xs(i))
-    def drop(n: Int): scala.Seq[Text] = xs.drop(n).to(Seq).map(Text(_))
-    def toSeq: scala.Seq[Text] = xs.to(Seq).map(Text(_))
-
-  object NoMatch extends Extractor(IArray()):
-    override def lengthCompare(len: Int): Int = -1
-
-  private def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
+  def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
                           scrutinee: Expr[String])
-                     (using Quotes): Expr[Extractor] =
+                     (using Quotes): Expr[Regex.Extractor] =
     import quotes.reflect.*
 
     '{
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       
       if matcher.matches()
-      then Extractor(IArray.range(1, $groups.size).map: i =>
+      then Regex.Extractor(IArray.range(1, $groups.size).map: i =>
         matcher.group($groups(i - 1) + 1).nn
       )
-      else NoMatch
+      else Regex.NoMatch
     }
 
-  private def matchOne(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
-                           scrutinee: Expr[String])
-                      (using Quotes): Expr[Option[String]] =
-    import quotes.reflect.*
-
-    '{
-      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
-      if matcher.matches() then
-        val matches = (1 until $groups.length).to(Array).map:
-          i => matcher.group($groups(i - 1) + 1)
-        
-        Some(matches.head.nn)
-      else None
-    }
-
-  case class Simple(pattern: String):
-    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
-
-  case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
-    transparent inline def unapplySeq(inline scrutinee: String): Extractor =
-      ${Regex.extract('pattern, 'groups, 'parts, 'scrutinee)}
