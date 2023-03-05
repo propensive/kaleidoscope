@@ -1,0 +1,7 @@
+
+[kaleidoscope/core]
+refs = gossamer/core
+
+[kaleidoscope/test]
+refs = probably/cli kaleidoscope/core
+
