@@ -1,8 +1,12 @@
 [kaleidoscope]
+target = kaleidoscope/test
+repos = propensive/gossamer propensive/probably
 
 [kaleidoscope/core]
+src = src/core
 refs = gossamer/core
 
 [kaleidoscope/test]
+src = src/test
 refs = probably/cli kaleidoscope/core
 
