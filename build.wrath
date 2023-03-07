@@ -1,13 +1,9 @@
 # This is a Wrath buildfile. More information is available at: https://github.com/propensive/wrath/
 [kaleidoscope]
-target = kaleidoscope/test
+target = kaleidoscope/core
 repos = propensive/gossamer propensive/probably
 
 [kaleidoscope/core]
 src = src/core
 refs = gossamer/core
-
-[kaleidoscope/test]
-src = src/test
-refs = probably/cli kaleidoscope/core
 
