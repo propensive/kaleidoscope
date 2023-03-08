@@ -90,8 +90,6 @@ object KaleidoscopeMacros:
   def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
                           scrutinee: Expr[String])
                      (using Quotes): Expr[Regex.Extractor] =
-    import quotes.reflect.*
-
     '{
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
       
