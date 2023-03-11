@@ -54,7 +54,7 @@ object Regex:
     def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
 
   case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
-    transparent inline def unapplySeq(inline scrutinee: String): Extractor =
+    transparent inline def unapplySeq(inline scrutinee: Text): Extractor =
       ${KaleidoscopeMacros.extract('pattern, 'groups, 'parts, 'scrutinee)}
 
 object KaleidoscopeMacros:
@@ -76,10 +76,9 @@ object KaleidoscopeMacros:
     val groups: List[Int] = parts.map(countGroups).inits.map(_.sum).to(List).reverse.tail
     val pattern = (parts.head +: parts.tail.map(_.substring(1).nn)).mkString
     
-    parts.tail.foreach:
-      p =>
-        if p.length < 2 || p.charAt(0) != '@' || p.charAt(1) != '('
-        then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
+    parts.tail.foreach: p =>
+      if p.length < 2 || p.charAt(0) != '@' || p.charAt(1) != '('
+      then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
     
     try Pattern.compile(pattern) catch case e: PatternSyntaxException =>
       report.errorAndAbort(s"kaleidoscope: ${e.getDescription} in pattern")
@@ -88,10 +87,10 @@ object KaleidoscopeMacros:
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
 
   def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
-                          scrutinee: Expr[String])
+                          scrutinee: Expr[Text])
                      (using Quotes): Expr[Regex.Extractor] =
     '{
-      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee).nn
+      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee.s).nn
       
       if matcher.matches()
       then Regex.Extractor(IArray.range(1, $groups.size).map: i =>
