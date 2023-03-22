@@ -3,6 +3,7 @@
 
 repo propensive/probably
 repo propensive/gossamer
+repo propensive/larceny
 
 target kaleidoscope/test
 
@@ -12,6 +13,6 @@ project kaleidoscope
     include gossamer/core
 
   module test
-    include  kaleidoscope/core probably/cli
+    include  kaleidoscope/core probably/cli larceny/plugin
     sources  src/test
     main     kaleidoscope.Tests
