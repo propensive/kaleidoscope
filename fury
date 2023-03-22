@@ -4,7 +4,7 @@
 repo propensive/probably
 repo propensive/gossamer
 
-target kaleidoscope/core
+target kaleidoscope/test
 
 project kaleidoscope
   module core
