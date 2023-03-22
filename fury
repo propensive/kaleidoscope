@@ -12,5 +12,6 @@ project kaleidoscope
     include gossamer/core
 
   module test
-    include kaleidoscope/core probably/cli
-    sources src/test
+    include  kaleidoscope/core probably/cli
+    sources  src/test
+    main     kaleidoscope.Tests
