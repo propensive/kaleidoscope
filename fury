@@ -9,10 +9,12 @@ target kaleidoscope/test
 
 project kaleidoscope
   module core
-    sources src/core
-    include gossamer/core
+    compiler  scala
+    sources   src/core
+    include   gossamer/core
 
   module test
-    include  kaleidoscope/core probably/cli larceny/plugin
-    sources  src/test
-    main     kaleidoscope.Tests
+    compiler  scala
+    include   kaleidoscope/core probably/cli larceny/plugin
+    sources   src/test
+    main      kaleidoscope.Tests
