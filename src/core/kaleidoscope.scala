@@ -59,7 +59,6 @@ object Regex:
 
 object KaleidoscopeMacros:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
-    import quotes.reflect.*
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
