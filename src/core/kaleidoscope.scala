@@ -78,10 +78,10 @@ object KaleidoscopeMacros:
     
     parts.tail.foreach: p =>
       if p.length < 2 || p.charAt(0) != '@' || p.charAt(1) != '('
-      then report.errorAndAbort("kaleidoscope: variable must be bound to a capturing group")
+      then fail("variable must be bound to a capturing group")
     
-    try Pattern.compile(pattern) catch case e: PatternSyntaxException =>
-      report.errorAndAbort(s"kaleidoscope: ${e.getDescription} in pattern")
+    try Pattern.compile(pattern)
+    catch case e: PatternSyntaxException => fail(s"${e.getDescription} in pattern")
     
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
