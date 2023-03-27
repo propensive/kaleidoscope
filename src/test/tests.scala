@@ -21,8 +21,6 @@ import rudiments.*
 import gossamer.*
 import larceny.*
 
-import unsafeExceptions.canThrowAny
-
 object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
     suite(t"Match tests"):

@@ -24,7 +24,9 @@ import scala.quoted.*
 import java.util.regex.*
 import java.util.concurrent.ConcurrentHashMap
 
-case class Regex(pattern: String)
+case class Regex(pattern: String):
+  lazy val javaPattern: Pattern = Regex.cache.computeIfAbsent(pattern, Pattern.compile(_)).nn
+  def unapply(text: Text): Boolean = javaPattern.matcher(text.s).nn.matches
 
 extension (inline sc: StringContext)
   transparent inline def r: Any = ${KaleidoscopeMacros.extractor('{sc})}
@@ -62,7 +64,9 @@ object KaleidoscopeMacros:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val (_, count) = part.tails.to(List).map(_.show).mtwin.map(_.take(1) -> _.slice(1, 3)).foldLeft(false -> 0):
+      val slices = part.tails.to(List).map(_.show).mtwin.map(_.take(1) -> _.slice(1, 3))
+      
+      val (_, count) = slices.foldLeft(false -> 0):
         case ((esc, cnt), (t"(", _)) if esc              => (false, cnt)
         case ((_, cnt), (t"(", t"?<"))                   => (false, cnt + 1)
         case ((_, cnt), (t"(", opt)) if opt.starts(t"?") => (false, cnt)
@@ -85,9 +89,10 @@ object KaleidoscopeMacros:
     if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
     else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
 
-  def extract(pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
-                          scrutinee: Expr[Text])
-                     (using Quotes): Expr[Regex.Extractor] =
+  def extract
+      (pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
+          scrutinee: Expr[Text])
+      (using Quotes): Expr[Regex.Extractor] =
     '{
       val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee.s).nn
       
@@ -97,4 +102,3 @@ object KaleidoscopeMacros:
       )
       else Regex.NoMatch
     }
-
