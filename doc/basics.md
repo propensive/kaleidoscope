@@ -57,3 +57,4 @@ example, an extractor matching a single opening parenthesis would be written as
 
 Kaleidoscope currently has no support for optional or repeated capturing
 groups.
+
