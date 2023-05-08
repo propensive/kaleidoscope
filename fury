@@ -2,7 +2,6 @@
 # More information is available at: https://github.com/propensive/wrath/
 
 repo propensive/probably
-repo propensive/gossamer
 repo propensive/larceny
 
 target kaleidoscope/test
@@ -11,7 +10,7 @@ project kaleidoscope
   module core
     compiler  scala
     sources   src/core
-    include   gossamer/core
+    include   rudiments/core
 
   module test
     compiler  scala

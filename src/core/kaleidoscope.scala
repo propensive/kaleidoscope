@@ -17,7 +17,6 @@
 package kaleidoscope
 
 import rudiments.*
-import gossamer.*
 
 import scala.quoted.*
 
@@ -37,9 +36,6 @@ extension (sc: StringContext)
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
-
-  given Cuttable[Text, Regex] = (text, regex, limit) =>
-    List(text.s.split(regex.pattern, limit).nn.map(_.nn).map(Text(_))*)
 
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
@@ -64,15 +60,16 @@ object KaleidoscopeMacros:
     val parts = sc.value.get.parts
 
     def countGroups(part: String): Int =
-      val slices = part.tails.to(List).map(_.show).mtwin.map(_.take(1) -> _.slice(1, 3))
+      val slices = part.tails.to(List).map: str =>
+        str.substring(0, 1.min(str.length)).nn -> str.substring(1.min(str.length), 3.min(str.length)).nn
       
       val (_, count) = slices.foldLeft(false -> 0):
-        case ((esc, cnt), (t"(", _)) if esc              => (false, cnt)
-        case ((_, cnt), (t"(", t"?<"))                   => (false, cnt + 1)
-        case ((_, cnt), (t"(", opt)) if opt.starts(t"?") => (false, cnt)
-        case ((_, cnt), (t"(", _))                       => (false, cnt + 1)
-        case ((esc, cnt), (t"\\", _))                    => (!esc, cnt)
-        case ((_, cnt), _)                               => (false, cnt)
+        case ((esc, cnt), ("(", _)) if esc                 => (false, cnt)
+        case ((_, cnt), ("(", "?<"))                       => (false, cnt + 1)
+        case ((_, cnt), ("(", opt)) if opt.startsWith("?") => (false, cnt)
+        case ((_, cnt), ("(", _))                          => (false, cnt + 1)
+        case ((esc, cnt), ("\\\\", _))                     => (!esc, cnt)
+        case ((_, cnt), _)                                 => (false, cnt)
       
       count
 
