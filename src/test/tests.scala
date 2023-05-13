@@ -18,6 +18,7 @@ package kaleidoscope
 
 import probably.*
 import rudiments.*
+import spectacular.*
 import gossamer.*
 import larceny.*
 

@@ -17,3 +17,4 @@ project kaleidoscope
     include   kaleidoscope/core probably/cli larceny/plugin
     sources   src/test
     main      kaleidoscope.Tests
+    coverage  kaleidoscope/core
