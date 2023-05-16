@@ -21,11 +21,6 @@ import rudiments.*
 import scala.quoted.*
 
 import java.util.regex.*
-import java.util.concurrent.ConcurrentHashMap
-
-case class Regex(pattern: String):
-  lazy val javaPattern: Pattern = Regex.cache.computeIfAbsent(pattern, Pattern.compile(_)).nn
-  def unapply(text: Text): Boolean = javaPattern.matcher(text.s).nn.matches
 
 extension (inline sc: StringContext)
   transparent inline def r: Any = ${KaleidoscopeMacros.extractor('{sc})}
@@ -33,27 +28,6 @@ extension (inline sc: StringContext)
 extension (sc: StringContext)
   def r(args: String*): Regex =
     Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
-
-object Regex:
-  private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
-
-  def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
-
-  class Extractor(xs: IArray[String]):
-    def lengthCompare(len: Int): Int = if xs.length == len then 0 else -1
-    def apply(i: Int): Text = Text(xs(i))
-    def drop(n: Int): scala.Seq[Text] = xs.drop(n).to(Seq).map(Text(_))
-    def toSeq: scala.Seq[Text] = xs.to(Seq).map(Text(_))
-
-  object NoMatch extends Extractor(IArray()):
-    override def lengthCompare(len: Int): Int = -1
-
-  case class Simple(pattern: String):
-    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
-
-  case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
-    transparent inline def unapplySeq(inline scrutinee: Text): Extractor =
-      ${KaleidoscopeMacros.extract('pattern, 'groups, 'parts, 'scrutinee)}
 
 object KaleidoscopeMacros:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
