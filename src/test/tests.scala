@@ -222,36 +222,36 @@ object Tests extends Suite(t"Kaleidoscope tests"):
   
       test(t"extract one word"):
         (t"hello world": @unchecked) match
-          case r"$first@(hello) world" => first.show
+          case r"$first(hello) world" => first.show
       .check(_ == t"hello")
   
       test(t"extract a nested capture group"):
         (t"hello world": @unchecked) match
-          case r"(($first@(hello)) world)" => first.show
+          case r"(($first(hello)) world)" => first.show
       .assert(_ == t"hello")
   
       test(t"extract words"):
         (t"hello world": @unchecked) match
-          case r"$first@(hello) $second@(world)" => List(first, second)
+          case r"$first(hello) $second(world)" => List(first, second)
       .assert(_ == List(t"hello", t"world"))
       
       test(t"skipped capture group"):
         (t"hello world": @unchecked) match
-          case r"(hello) $second@(world)" => second.show
+          case r"(hello) $second(world)" => second.show
       .assert(_ == t"world")
   
       test(t"skipped capture group 2"):
         (t"1 2 3 4 5": @unchecked) match
-          case r"1 $two@(2) 3 4 5" => two.show
+          case r"1 $two(2) 3 4 5" => two.show
       .assert(_ == t"2")
   
       test(t"nested unbound capture group"):
         (t"anyval": @unchecked) match
-          case r"$x@(any(val))" => x.show
+          case r"$x(any(val))" => x.show
       .assert(_ == t"anyval")
       
       test(t"email regex"):
-        val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
+        val r"^$prefix([a-z0-9._%+-]+)@$domain([a-z0-9.-]+)\.$tld([a-z]{2,6})$$" =
             t"test@example.com": @unchecked
         
         List(prefix, domain, tld)
