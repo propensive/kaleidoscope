@@ -21,15 +21,6 @@ import rudiments.*
 import java.util.regex.*
 import java.util.concurrent.ConcurrentHashMap
 
-case class Regex(pattern: String):
-  lazy val javaPattern: Pattern = Regex.cache.computeIfAbsent(pattern, Pattern.compile(_)).nn
-  def unapply(text: Text): Boolean = javaPattern.matcher(text.s).nn.matches
-
-object Regex:
-  private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
-
-  def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
-
 object InvalidRegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
