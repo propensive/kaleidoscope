@@ -15,6 +15,7 @@ patterns are written inline, and do not need to be predefined.
 - pattern match strings against regular expressions
 - regular expressions can be written inline in patterns
 - extraction of capturing groups in patterns
+- typed extraction (into `List`s or `Option`s) of variable-length capturing groups
 - static verification of regular expression syntax
 
 
@@ -50,26 +51,43 @@ possible to extract parts of the matched string using capturing groups. The
 pattern syntax is exactly as described in the [Java Standard
 Library](https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html),
 with the exception that a capturing group (enclosed within `(` and `)`) may be
-bound to an identifier by prefixing the group with an `@`, and the identifier
-to extract to, which in standard Scala syntax, is written either as
-`$identifier` or `${identifier}`.
+bound to an identifier by placing it, like an interpolated string substitution,
+immediately prior to the capturing group, as `$identifier` or `${identifier}`.
 
 Here is an example:
 ```scala
 path match
-  case r"/images/${img}@(.*)"  => Image(img)
-  case r"/styles/$styles@(.*)" => Stylesheet(styles)
+  case r"/images/${img}(.*)"  => Image(img)
+  case r"/styles/$styles(.*)" => Stylesheet(styles)
 ```
 
-or as an extractor on a `val`, like so (using the Scala REPL):
+Alternatively, this can be extracted directly in a `val` definition, like so:
 ```scala
-val r"^[a-z0-9._%+-]+@$domain@([a-z0-9.-]+\.$tld@([a-z]{2,6})$$" = "test@example.com"
+val r"^[a-z0-9._%+-]+@$domain([a-z0-9.-]+\.$tld([a-z]{2,6})$$" = "test@example.com"
 > domain: String = "example.com"
 > tld: String = "com"
 ```
 
-In addition, regular expressions will be checked at compile-time, and any
+In addition, the syntax of the regular expressionwill be checked at compile-time, and any
 issues will be reported then.
+
+### Repeated and optional capture groups
+
+A normal, unitary capturing group will extract into a `Text` value. But if a capturing group has
+a repetition suffix, such as `*` or `+`, then the extracted type will be a `List[Text]`. This also
+applies to repetition ranges, such as `{3}`, `{2,}` or `{1,9}`. Note that `{1}` will still extract
+a `Text` value.
+
+A capture group may be marked as optional, meaning it can appear either zero or one times. This
+will extract a value with the type `Option[Text]`.
+
+For example, see how `init` is extracted as a `List[Text]`, below:
+```scala
+"parsley, sage, rosemary, and thyme" match
+  case r"$only([a-z]+)"                      => List(only)
+  case r"$first([a-z]+) and $second([a-z]+)" => List(first, second)
+  case r"$init([a-z]+, )*and $last([a-z]+)"  => init.map(_.drop(2, Rtl)) :+ last
+```
 
 ### Escaping
 
@@ -79,12 +97,6 @@ to be escaped, with the exception of `$` which should be written as `$$`. It is
 still necessary, however, to follow the regular expression escaping rules, for
 example, an extractor matching a single opening parenthesis would be written as
 `r"\("` or `r"""\("""`.
-
-### Limitations
-
-Kaleidoscope currently has no support for optional or repeated capturing
-groups.
-
 
 
 ## Status
