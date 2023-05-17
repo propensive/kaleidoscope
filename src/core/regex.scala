@@ -30,8 +30,38 @@ object Regex:
 
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
-case class InvalidRegexError()
-extends Error(ErrorMessage(List(Text("mismatched parentheses")), Nil))
+object InvalidRegexError:
+  enum Reason:
+    case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
+        IncompleteRepetition
+    
+    def message: Text = this match
+      case UnclosedGroup =>
+        Text("a capturing group was not closed")
+      
+      case ExpectedGroup =>
+        Text("a capturing group was expected immediately following an extractor")
+      
+      case BadRepetition =>
+        Text("the maximum number of repetitions is less than the minimum")
+      
+      case Uncapturable =>
+        Text("a capturing group inside a repeating group can not be extracted")
+      
+      case UnexpectedChar =>
+        Text("the repetition range contained an unexpected character")
+      
+      case NotInGroup =>
+        Text("a closing parenthesis was found without a corresponding opening parenthesis")
+
+      case IncompleteRepetition =>
+        Text("the repetition range was not closed")
+
+case class InvalidRegexError(reason: InvalidRegexError.Reason)
+extends Error(ErrorMessage(List(Text("the regular expression could not be parsed because "),
+    Text("")), List(reason.message)))
+
+import InvalidRegexError.Reason.*
 
 object Regexp:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
@@ -79,9 +109,9 @@ object Regexp:
     try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
   
   def parse(parts: List[Text]): Regexp throws InvalidRegexError =
-    parts match
-      case Nil => throw InvalidRegexError()
-      case head :: tail => if !tail.forall(_.s.startsWith("(")) then throw InvalidRegexError()
+    (parts: @unchecked) match
+      case head :: tail =>
+        if !tail.forall(_.s.startsWith("(")) then throw InvalidRegexError(ExpectedGroup)
     
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
@@ -118,32 +148,43 @@ object Regexp:
           case ',' =>
             index += 1
             number(false) match
-              case 0 => Quantifier.AtLeast(n)
-              case m => if m < n then throw InvalidRegexError() else Quantifier.Between(n, m)
+              case 0 =>
+                Quantifier.AtLeast(n)
+              
+              case m =>
+                if m < n then throw InvalidRegexError(BadRepetition) else Quantifier.Between(n, m)
+          
           case _ =>
-            throw InvalidRegexError()
+            throw InvalidRegexError(UnexpectedChar)
         
-        if cur() != '}' then throw InvalidRegexError() else quantifier.adv()
+        if cur() != '}' then throw InvalidRegexError(UnexpectedChar) else quantifier.adv()
       
       case _ =>
         Quantifier.Exactly(1)
 
     @tailrec
     def number(required: Boolean, num: Int = 0, first: Boolean = true): Int = cur() match
-      case '\u0000'         => throw InvalidRegexError()
-      case ch if ch.isDigit => index += 1 ; number(required, num*10 + (ch - '0').toInt, false)
-      case other            => if first && required then throw InvalidRegexError() else num
+      case '\u0000' =>
+        throw InvalidRegexError(IncompleteRepetition)
+      
+      case ch if ch.isDigit =>
+        index += 1
+        number(required, num*10 + (ch - '0').toInt, false)
+      
+      case other =>
+        if first && required then throw InvalidRegexError(UnexpectedChar) else num
 
     def group(start: Int, children: List[Group], top: Boolean): Group =
       cur() match
         case '\u0000' =>
-          if !top then throw InvalidRegexError()
+          if !top then throw InvalidRegexError(UnclosedGroup)
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
               Quantifier.Exactly(1), Greediness.Greedy, captured.contains(start - 1))
         case '(' =>
           index += 1
           group(start, group(index, Nil, false) :: children, top)
         case ')' =>
+          if top then throw InvalidRegexError(NotInGroup)
           val end = index
           index += 1
           val quant = quantifier()
@@ -158,7 +199,7 @@ object Regexp:
     
     def check(groups: List[Group], canCapture: Boolean): Unit =
       groups.foreach: group =>
-        if !canCapture && group.capture then throw InvalidRegexError()
+        if !canCapture && group.capture then throw InvalidRegexError(Uncapturable)
         check(group.groups, canCapture && group.quantifier.unitary)
     
     check(mainGroup.groups, true)

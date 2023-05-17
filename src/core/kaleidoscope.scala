@@ -43,8 +43,7 @@ object KaleidoscopeMacros:
     val parts = sc.value.get.parts.to(List)
     
     val regexp = try Regexp.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
-      case InvalidRegexError() => fail("invalid regular expression")
-
+      case err@InvalidRegexError(_) => fail(err.message.text.s)
 
     val types = regexp.captureGroups.map(_.quantifier).map:
       case Regexp.Quantifier.Exactly(1)    => TypeRepr.of[Text]

@@ -92,48 +92,48 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       suite(t"Parsing failures"):
         test(t"Fail to parse aa(bb){14,16ccddee"):
           capture(Regexp.parse(List(t"aa(bb){14,16ccddee")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.UnexpectedChar))
         
         test(t"Fail to parse aa(bb){14!}ccddee"):
           capture(Regexp.parse(List(t"aa(bb){14!}ccddee")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.UnexpectedChar))
         
         test(t"Fail to parse aa(bb{14}ccddee"):
           capture(Regexp.parse(List(t"aa(bb{14}ccddee")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.UnclosedGroup))
         
         test(t"Fail to parse aa(bb){2,1}c"):
           capture(Regexp.parse(List(t"aa(bb){2,1}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.BadRepetition))
         
         test(t"Fail to parse aabb){2,1}c"):
           capture(Regexp.parse(List(t"aabb){2,1}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.NotInGroup))
         
         test(t"Fail to parse aa(bb){2,,1}c"):
           capture(Regexp.parse(List(t"aabb){2,,1}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.NotInGroup))
         
         test(t"Fail to parse aabb){2,,1}c"):
           capture(Regexp.parse(List(t"aabb){2,,1}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.NotInGroup))
         
         test(t"Fail to parse aabb){,2}c"):
           capture(Regexp.parse(List(t"aabb){,2}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.NotInGroup))
         
         test(t"Fail to parse aa(bb){2,,1}c"):
           capture(Regexp.parse(List(t"aa(bb){2,,1}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.UnexpectedChar))
         
         test(t"Fail to parse aa(bb){"):
           capture(Regexp.parse(List(t"aa(bb){")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.IncompleteRepetition))
       
       suite(t"Test captures"):
         test(t"Capture without parens should fail"):
           capture(Regexp.parse(List(t"a", t"a(bb)")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.ExpectedGroup))
         
         test(t"Check simple group is captured"):
           Regexp.parse(List(t"aa", t"(bb)cc"))
@@ -149,11 +149,11 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       
         test(t"Check that capture in repeated group is forbidden"):
           capture(Regexp.parse(List(t"a(a", t"(bb)c)*c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.Uncapturable))
         
         test(t"Check that capture in another repeated group is forbidden"):
           capture(Regexp.parse(List(t"a(a", t"(bb)c){2}c")))
-        .assert(_ == InvalidRegexError())
+        .assert(_ == InvalidRegexError(InvalidRegexError.Reason.Uncapturable))
       
       suite(t"Capturing patterns"):
         test(t"Show plain capturing pattern"):
@@ -263,12 +263,12 @@ object Tests extends Suite(t"Kaleidoscope tests"):
           t"" match
             case r"hello(world" =>
         .head.message
-      .assert(_.contains("kaleidoscope: Unclosed group in pattern"))
+      .assert(_.contains("kaleidoscope: the regular expression could not be parsed because a capturing group was not closed"))
       
       test(t"variable must be bound"):
         captureCompileErrors:
           t"" match
             case r"hello${space}world" =>
         .head.message
-      .assert(_.contains("kaleidoscope: variable must be bound to a capturing group"))
+      .assert(_.contains("kaleidoscope: the regular expression could not be parsed because a capturing group was expected immediately following an extractor"))
   
