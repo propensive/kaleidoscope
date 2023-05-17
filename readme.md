@@ -7,8 +7,9 @@
 __Statically-checked inline matching on regular expressions__
 
 Kaleidoscope is a small library which provides pattern matching using regular
-expressions, and extraction of capturing groups into values. In particular,
-patterns are written inline, and do not need to be predefined.
+expressions, and extraction of capturing groups into values, which are typed
+according to the repetition of the group. Patterns can be written inline,
+directly in a `case` pattern, and do not need to be predefined.
 
 ## Features
 
@@ -115,7 +116,7 @@ be used, but caution should be taken if there is a mismatch between the
 project's stability level and the importance of your own project.
 
 Kaleidoscope is designed to be _small_. Its entire source code currently consists
-of 379 lines of code.
+of 377 lines of code.
 
 ## Building
 
