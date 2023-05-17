@@ -22,55 +22,44 @@ import scala.quoted.*
 
 import java.util.regex.*
 
-extension (inline sc: StringContext)
-  transparent inline def r: Any = ${KaleidoscopeMacros.extractor('{sc})}
+extension (inline ctx: StringContext)
+  transparent inline def r: Any = ${KaleidoscopeMacros.extractor('ctx)}
 
-extension (sc: StringContext)
-  def r(args: String*): Regex =
-    Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
+// extension (sc: StringContext)
+//   def r(args: String*): Regex =
+//     Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
+
+class NoExtraction(pattern: String):
+  def unapply(scrutinee: Text): Boolean =
+    !Regexp.unsafeParse(List(pattern)).matches(scrutinee).isEmpty
+
+class Extractor[ResultType](parts: Seq[String]):
+  def unapply(scrutinee: Text): ResultType =
+    val result = Regexp.unsafeParse(parts).matches(scrutinee)
+    if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
+    else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
 object KaleidoscopeMacros:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
-    val parts = sc.value.get.parts
-
-    def countGroups(part: String): Int =
-      val slices = part.tails.to(List).map: str =>
-        str.substring(0, 1.min(str.length)).nn -> str.substring(1.min(str.length), 3.min(str.length)).nn
-      
-      val (_, count) = slices.foldLeft(false -> 0):
-        case ((esc, cnt), ("(", _)) if esc                 => (false, cnt)
-        case ((_, cnt), ("(", "?<"))                       => (false, cnt + 1)
-        case ((_, cnt), ("(", opt)) if opt.startsWith("?") => (false, cnt)
-        case ((_, cnt), ("(", _))                          => (false, cnt + 1)
-        case ((esc, cnt), ("\\\\", _))                     => (!esc, cnt)
-        case ((_, cnt), _)                                 => (false, cnt)
-      
-      count
-
-    val groups: List[Int] = parts.map(countGroups).inits.map(_.sum).to(List).reverse.tail
-    val pattern = (parts.head +: parts.tail.map(_.substring(1).nn)).mkString
+    import quotes.reflect.*
+    val initParts = sc.value.get.parts.to(List)
     
-    parts.tail.foreach: p =>
-      if p.length < 2 || p.charAt(0) != '@' || p.charAt(1) != '('
-      then fail("variable must be bound to a capturing group")
-    
-    try Pattern.compile(pattern)
-    catch case e: PatternSyntaxException => fail(s"${e.getDescription} in pattern")
-    
-    if parts.length == 1 then '{Regex.Simple(${Expr(pattern)})}
-    else '{Regex.Extract(${Expr(pattern)}, ${Expr(groups)}, ${Expr(parts)})}
+    val parts = initParts.head :: initParts.tail.map: elem =>
+      if elem.startsWith("@") then elem.substring(1).nn else elem.nn
 
-  def extract
-      (pattern: Expr[String], groups: Expr[List[Int]], parts: Expr[Seq[String]],
-          scrutinee: Expr[Text])
-      (using Quotes): Expr[Regex.Extractor] =
-    '{
-      val matcher: Matcher = Regex.pattern($pattern).matcher($scrutinee.s).nn
-      
-      if matcher.matches()
-      then Regex.Extractor(IArray.range(1, $groups.size).map: i =>
-        matcher.group($groups(i - 1) + 1).nn
-      )
-      else Regex.NoMatch
-    }
+    val regexp = try Regexp.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
+      case InvalidRegexError() => fail("invalid regular expression")
 
+
+    val types = regexp.captureGroups.map(_.quantifier).map:
+      case Regexp.Quantifier.Exactly(1)    => TypeRepr.of[Text]
+      case Regexp.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
+      case _                               => TypeRepr.of[List[Text]]
+
+    lazy val tupleType =
+      if types.length == 1 then types.head
+      else AppliedType(defn.TupleClass(types.length).info.typeSymbol.typeRef, types)
+
+    if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
+    else (tupleType.asType: @unchecked) match
+      case '[resultType] => '{Extractor[Option[resultType]](${Expr(parts)})}

@@ -178,30 +178,33 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       
       suite(t"Matching patterns"):
         test(t"Simple capture"):
-          Regexp.parse(List(t"foo", t"(bar)")).matches(t"foobar")
-        .assert(_ == Some(Match(List(t"bar"))))
+          Regexp.parse(List(t"foo", t"(bar)")).matches(t"foobar").map(_.to(List))
+        .assert(_ == Some(List(t"bar")))
         
         test(t"Two captures"):
-          Regexp.parse(List(t"foo", t"(bar)", t"(baz)")).matches(t"foobarbaz")
-        .assert(_ == Some(Match(List(t"bar", t"baz"))))
+          Regexp.parse(List(t"foo", t"(bar)", t"(baz)")).matches(t"foobarbaz").map(_.to(List))
+        .assert(_ == Some(List(t"bar", t"baz")))
         
         test(t"Two captures, one repeating"):
-          Regexp.parse(List(t"foo", t"(bar)", t"(baz)*")).matches(t"foobarbazbaz")
-        .assert(_ == Some(Match(List(t"bar", List(t"baz", t"baz")))))
+          Regexp.parse(List(t"foo", t"(bar)", t"(baz)*")).matches(t"foobarbazbaz").map(_.to(List))
+        .assert(_ == Some(List(t"bar", List(t"baz", t"baz"))))
         
         test(t"Two captures, both repeating"):
-          Regexp.parse(List(t"foo", t"(bar){4}", t"(baz)*")).matches(t"foobarbarbarbarbazbaz")
-        .assert(_ == Some(Match(List(List(t"bar", t"bar", t"bar", t"bar"), List(t"baz", t"baz")))))
+          Regexp.parse(List(t"foo", t"(bar){4}", t"(baz)*")).matches(t"foobarbarbarbarbazbaz").map(_.to(List))
+        .assert(_ == Some(List(List(t"bar", t"bar", t"bar", t"bar"), List(t"baz", t"baz"))))
         
         test(t"Two captures, one optional and absent, one repeating"):
-          Regexp.parse(List(t"foo", t"(bar)+", t"(baz)?")).matches(t"foobarbar")
-        .assert(_ == Some(Match(List(List(t"bar", t"bar"), None))))
+          Regexp.parse(List(t"foo", t"(bar)+", t"(baz)?")).matches(t"foobarbar").map(_.to(List))
+        .assert(_ == Some(List(List(t"bar", t"bar"), None)))
         
         test(t"Two captures, one optional and present, one repeating"):
-          Regexp.parse(List(t"foo", t"(b.r)+", t"(baz)?")).matches(t"fooberbirbaz")
-        .assert(_ == Some(Match(List(List(t"ber", t"bir"), Some("baz")))))
+          Regexp.parse(List(t"foo", t"(b.r)+", t"(baz)?")).matches(t"fooberbirbaz").map(_.to(List))
+        .assert(_ == Some(List(List(t"ber", t"bir"), Some(t"baz"))))
+        
+        test(t"Nested captures, one optional and present, one repeating"):
+          Regexp.parse(List(t"f(oo", t"(b.r)+", t"(baz)?)")).matches(t"fooberbirbaz").map(_.to(List))
+        .assert(_ == Some(List(List(t"ber", t"bir"), Some(t"baz"))))
       
-
     suite(t"Match tests"):
       test(t"simple match"):
         (t"hello world": @unchecked) match
@@ -245,7 +248,7 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       
       test(t"email regex"):
         val r"^$prefix@([a-z0-9._%+-]+)@$domain@([a-z0-9.-]+)\.$tld@([a-z]{2,6})$$" =
-            t"test@example.com"
+            t"test@example.com": @unchecked
         
         List(prefix, domain, tld)
       .assert(_ == List(t"test", t"example", t"com"))

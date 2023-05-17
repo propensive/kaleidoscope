@@ -14,23 +14,8 @@ object Regex:
 
   def pattern(p: String): Pattern = cache.computeIfAbsent(p, Pattern.compile(_)).nn
 
-  class Extractor(xs: IArray[String]):
-    def lengthCompare(len: Int): Int = if xs.length == len then 0 else -1
-    def apply(i: Int): Text = Text(xs(i))
-    def drop(n: Int): scala.Seq[Text] = xs.drop(n).to(Seq).map(Text(_))
-    def toSeq: scala.Seq[Text] = xs.to(Seq).map(Text(_))
-
-  object NoMatch extends Extractor(IArray()):
-    override def lengthCompare(len: Int): Int = -1
-
-  case class Simple(pattern: String):
-    def unapply(scrutinee: String): Boolean = Regex.pattern(pattern).matcher(scrutinee).nn.matches
-
-  case class Extract(pattern: String, groups: List[Int], parts: Seq[String]):
-    transparent inline def unapplySeq(inline scrutinee: Text): Extractor =
-      ${KaleidoscopeMacros.extract('pattern, 'groups, 'parts, 'scrutinee)}
-
-case class InvalidRegexError() extends Error(ErrorMessage(List(Text("mismatched parentheses")), Nil))
+case class InvalidRegexError()
+extends Error(ErrorMessage(List(Text("mismatched parentheses")), Nil))
 
 object Regexp:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
@@ -63,16 +48,18 @@ object Regexp:
           quantifier: Quantifier = Quantifier.Exactly(1),
           greediness: Greediness = Greediness.Greedy, capture: Boolean = false):
     
-    def orderedGroups: List[Group] = groups.flatMap(_.orderedGroups)
     def outerStart: Int = (start - 1).max(0)
+    def allGroups: List[Regexp.Group] = groups.flatMap { group => group :: group.allGroups }
+    def captureGroups: List[Regexp.Group] = allGroups.filter(_.capture)
     
-    def serialize(pattern: Text, idx: Int): Text =
-      val subpattern = pattern.s.substring(start, end)
+    def serialize(pattern: Text, idx: Int): (Int, Text) =
+      val (idx2, subpattern) = Regexp.makePattern(pattern, groups, start, Text(""), end, idx)
       val groupName = Text(if capture then s"?<g$idx>" else "")
       
-      if quantifier.unitary then Text(s"($groupName$subpattern)")
-      else Text(s"($groupName($subpattern)${quantifier.serialize}${greediness.serialize})")
+      if quantifier.unitary then (idx2, Text(s"($groupName$subpattern)"))
+      else (idx2, Text(s"($groupName($subpattern)${quantifier.serialize}${greediness.serialize})"))
 
+  def unsafeParse(parts: Seq[String]): Regexp = try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
   def parse(parts: List[Text]): Regexp throws InvalidRegexError =
     parts match
       case Nil => throw InvalidRegexError()
@@ -160,26 +147,27 @@ object Regexp:
     
     Regexp(text, mainGroup.groups)
       
-
-case class Match(results: List[Text | Option[Text] | List[Text]])
+  def makePattern(pattern: Text, todo: List[Regexp.Group], last: Int, text: Text, end: Int, idx: Int): (Int, Text) = todo match
+    case Nil =>
+      (idx, Text(text.s+pattern.s.substring(last, end).nn))
+    
+    case head :: tail =>
+      val (idx2, subpattern) = head.serialize(pattern, idx)
+      val partial = text.s+pattern.s.substring(last, head.outerStart)+subpattern.nn
+      makePattern(pattern, tail, head.outerEnd, Text(partial), end, idx2 + 1)
 
 case class Regexp(pattern: Text, groups: List[Regexp.Group]):
-  lazy val capturePattern: Text =
-    def recur(todo: List[Regexp.Group], last: Int, text: Text, idx: Int): Text = todo match
-      case Nil =>
-        Text(text.s+pattern.s.substring(last).nn)
-      
-      case head :: tail =>
-        val subpattern = head.serialize(pattern, idx)
-        val partial = text.s+pattern.s.substring(last, head.outerStart)+subpattern.nn
-        recur(tail, head.outerEnd, Text(partial), idx + 1)
-    
-    recur(groups, 0, Text(""), 0)
   
+  lazy val capturePattern: Text =
+    Regexp.makePattern(pattern, groups, 0, Text(""), pattern.s.length, 0)(1)
+  
+  def allGroups: List[Regexp.Group] = groups.flatMap { group => group :: group.allGroups }
+  def captureGroups: List[Regexp.Group] = allGroups.filter(_.capture)
+
   private[kaleidoscope] lazy val javaPattern: Pattern =
     Regexp.cache.computeIfAbsent(capturePattern.s, Pattern.compile(_)).nn
 
-  def matches(text: Text): Option[Match] =
+  def matches(text: Text): Option[IArray[Text | List[Text] | Option[Text]]] =
     val matcher = javaPattern.matcher(text.s).nn
     
     def recur
@@ -207,4 +195,4 @@ case class Regexp(pattern: Text, groups: List[Regexp.Group]):
 
         recur(tail, matches2, idx + 1)
     
-    if matcher.matches then Some(Match(recur(groups, Nil, 0).reverse)) else None
+    if matcher.matches then Some(IArray.from(recur(captureGroups, Nil, 0).reverse)) else None
