@@ -20,12 +20,15 @@ import rudiments.*
 
 import scala.quoted.*
 
+import java.util.regex.*
+
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${KaleidoscopeMacros.extractor('ctx)}
 
-// extension (sc: StringContext)
-//   def r(args: String*): Regex =
-//     Regex(sc.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+sc.parts.last)
+extension (ctx: StringContext)
+  def r(args: String*): Regexp throws InvalidRegexError =
+    Regexp.parse(List(Text(ctx.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+
+        ctx.parts.last)))
 
 class NoExtraction(pattern: String):
   def unapply(scrutinee: Text): Boolean =
