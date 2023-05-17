@@ -164,6 +164,10 @@ object Tests extends Suite(t"Kaleidoscope tests"):
           Regexp.parse(List(t"a", t"(bc)")).capturePattern
         .assert(_ == t"a(?<g0>bc)")
         
+        test(t"Capturing groups are numbered correctly"):
+          Regexp.parse(List(t"(hello) ", t"(world)")).capturePattern
+        .assert(_ == t"(hello) (?<g0>world)")
+        
         test(t"Show double capturing pattern"):
           Regexp.parse(List(t"a", t"(bc)d", t"(ef)")).capturePattern
         .assert(_ == t"a(?<g0>bc)d(?<g1>ef)")

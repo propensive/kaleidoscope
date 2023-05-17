@@ -20,8 +20,6 @@ import rudiments.*
 
 import scala.quoted.*
 
-import java.util.regex.*
-
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${KaleidoscopeMacros.extractor('ctx)}
 

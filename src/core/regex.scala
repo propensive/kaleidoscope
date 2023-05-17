@@ -1,19 +1,3 @@
-/*
-    Kaleidoscope, version [unreleased]. Copyright 2023 Jon Pretty, Propensive OÜ.
-
-    The primary distribution site is: https://propensive.com/
-
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
-    file except in compliance with the License. You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software distributed under the
-    License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-    either express or implied. See the License for the specific language governing permissions
-    and limitations under the License.
-*/
-
 package kaleidoscope
 
 import rudiments.*
@@ -75,7 +59,9 @@ object Regexp:
       if quantifier.unitary then (idx2, Text(s"($groupName$subpattern)"))
       else (idx2, Text(s"($groupName($subpattern)${quantifier.serialize}${greediness.serialize})"))
 
-  def unsafeParse(parts: Seq[String]): Regexp = try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
+  def unsafeParse(parts: Seq[String]): Regexp =
+    try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
+  
   def parse(parts: List[Text]): Regexp throws InvalidRegexError =
     parts match
       case Nil => throw InvalidRegexError()
@@ -170,7 +156,7 @@ object Regexp:
     case head :: tail =>
       val (idx2, subpattern) = head.serialize(pattern, idx)
       val partial = text.s+pattern.s.substring(last, head.outerStart)+subpattern.nn
-      makePattern(pattern, tail, head.outerEnd, Text(partial), end, idx2 + 1)
+      makePattern(pattern, tail, head.outerEnd, Text(partial), end, if head.capture then idx2 + 1 else idx2)
 
 case class Regexp(pattern: Text, groups: List[Regexp.Group]):
   
