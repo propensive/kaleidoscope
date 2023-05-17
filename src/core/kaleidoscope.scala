@@ -40,11 +40,8 @@ class Extractor[ResultType](parts: Seq[String]):
 object KaleidoscopeMacros:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     import quotes.reflect.*
-    val initParts = sc.value.get.parts.to(List)
+    val parts = sc.value.get.parts.to(List)
     
-    val parts = initParts.head :: initParts.tail.map: elem =>
-      if elem.startsWith("@") then elem.substring(1).nn else elem.nn
-
     val regexp = try Regexp.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
       case InvalidRegexError() => fail("invalid regular expression")
 
