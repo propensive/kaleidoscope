@@ -26,17 +26,17 @@ extension (inline ctx: StringContext)
   transparent inline def r: Any = ${KaleidoscopeMacros.extractor('ctx)}
 
 extension (ctx: StringContext)
-  def r(args: String*): Regexp throws InvalidRegexError =
-    Regexp.parse(List(Text(ctx.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+
+  def r(args: String*): Regex throws InvalidRegexError =
+    Regex.parse(List(Text(ctx.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+
         ctx.parts.last)))
 
 class NoExtraction(pattern: String):
   def unapply(scrutinee: Text): Boolean =
-    !Regexp.unsafeParse(List(pattern)).matches(scrutinee).isEmpty
+    !Regex.unsafeParse(List(pattern)).matches(scrutinee).isEmpty
 
 class Extractor[ResultType](parts: Seq[String]):
   def unapply(scrutinee: Text): ResultType =
-    val result = Regexp.unsafeParse(parts).matches(scrutinee)
+    val result = Regex.unsafeParse(parts).matches(scrutinee)
     if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
@@ -45,12 +45,12 @@ object KaleidoscopeMacros:
     import quotes.reflect.*
     val parts = sc.value.get.parts.to(List)
     
-    val regexp = try Regexp.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
+    val regexp = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
       case err@InvalidRegexError(_) => fail(err.message.text.s)
 
     val types = regexp.captureGroups.map(_.quantifier).map:
-      case Regexp.Quantifier.Exactly(1)    => TypeRepr.of[Text]
-      case Regexp.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
+      case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
+      case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
       case _                               => TypeRepr.of[List[Text]]
 
     lazy val tupleType =
