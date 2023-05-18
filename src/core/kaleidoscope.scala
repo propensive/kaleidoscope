@@ -45,10 +45,10 @@ object KaleidoscopeMacros:
     import quotes.reflect.*
     val parts = sc.value.get.parts.to(List)
     
-    val regexp = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
+    val regex = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
       case err@InvalidRegexError(_) => fail(err.message.text.s)
 
-    val types = regexp.captureGroups.map(_.quantifier).map:
+    val types = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
       case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
       case _                               => TypeRepr.of[List[Text]]
