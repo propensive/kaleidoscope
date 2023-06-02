@@ -21,6 +21,8 @@ import rudiments.*
 import java.util.regex.*
 import java.util.concurrent.ConcurrentHashMap
 
+import language.experimental.captureChecking
+
 object InvalidRegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
