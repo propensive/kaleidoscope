@@ -53,7 +53,7 @@ object KaleidoscopeMacros:
     val types = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
       case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
-      case _                               => TypeRepr.of[List[Text]]
+      case _                              => TypeRepr.of[List[Text]]
 
     lazy val tupleType =
       if types.length == 1 then types.head
