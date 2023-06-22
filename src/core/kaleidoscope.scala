@@ -25,7 +25,7 @@ import java.util.regex.*
 import language.experimental.captureChecking
 
 extension (inline ctx: StringContext)
-  transparent inline def r: Any = ${KaleidoscopeMacros.extractor('ctx)}
+  transparent inline def r: Any = ${Kaleidoscope.extractor('ctx)}
 
 extension (ctx: StringContext)
   def r(args: String*): Regex throws InvalidRegexError =
@@ -42,7 +42,7 @@ class Extractor[ResultType](parts: Seq[String]):
     if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
-object KaleidoscopeMacros:
+object Kaleidoscope:
   def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     import quotes.reflect.*
     val parts = sc.value.get.parts.to(List)
