@@ -257,6 +257,40 @@ object Tests extends Suite(t"Kaleidoscope tests"):
         List(prefix, domain, tld)
       .assert(_ == List(t"test", t"example", t"com"))
 
+    suite(t"Glob tests"):
+      test(t"Parse a plain glob"):
+        Glob.parse(t"hello world").regex
+      .assert(_ == t"hello world")
+      
+      test(t"Parse a plain glob with some symbols"):
+        Glob.parse(t"hello-world!").regex
+      .assert(_ == t"hello\\-world\\!")
+      
+      test(t"Parse a glob with a star"):
+        Glob.parse(t"hello*world").regex
+      .assert(_ == t"hello[^/\\]*world")
+      
+      test(t"Parse a glob with a question mark"):
+        Glob.parse(t"hello?world").regex
+      .assert(_ == t"hello[^/\\]world")
+      
+      test(t"Parse a glob with a range"):
+        Glob.parse(t"hello[a-z]world").regex
+      .assert(_ == t"hello[a-z]world")
+      
+      test(t"Parse a glob with a specific set of characters"):
+        Glob.parse(t"hello[aeiou]world").regex
+      .assert(_ == t"hello[aeiou]world")
+      
+      test(t"Parse a glob excluding a specific set of characters"):
+        Glob.parse(t"hello[!aeiou]world").regex
+      .assert(_ == t"hello[^aeiou]world")
+      
+      test(t"Parse a glob excluding a range of characters"):
+        Glob.parse(t"hello[!a-z]world").regex
+      .assert(_ == t"hello[^a-z]world")
+        
+
     suite(t"Compiler tests"): 
       test(t"brackets must be matched"):
         captureCompileErrors:
