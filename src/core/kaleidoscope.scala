@@ -25,7 +25,8 @@ import java.util.regex.*
 import language.experimental.captureChecking
 
 extension (inline ctx: StringContext)
-  transparent inline def r: Any = ${Kaleidoscope.extractor('ctx)}
+  transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
+  transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
 
 extension (ctx: StringContext)
   def r(args: String*): Regex throws InvalidRegexError =
@@ -43,10 +44,19 @@ class Extractor[ResultType](parts: Seq[String]):
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
 object Kaleidoscope:
-  def extractor(sc: Expr[StringContext])(using Quotes): Expr[Any] =
-    import quotes.reflect.*
-    val parts = sc.value.get.parts.to(List)
+
+  def glob(sc: Expr[StringContext])(using Quotes): Expr[Any] =
+    val parts = sc.value.get.parts.map(Text(_)).map(Glob.parse(_).regex.s).to(List)
+    val parts2 = parts.head :: parts.tail.map("([^/\\\\]*)"+_)
     
+    extractor(parts2)
+
+  def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] =
+    extractor(sc.value.get.parts.to(List))
+
+  private def extractor(parts: List[String])(using Quotes): Expr[Any] =
+    import quotes.reflect.*
+
     val regex = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
       case err@InvalidRegexError(_) => fail(err.message.text.s)
 

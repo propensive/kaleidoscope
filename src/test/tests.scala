@@ -268,11 +268,11 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       
       test(t"Parse a glob with a star"):
         Glob.parse(t"hello*world").regex
-      .assert(_ == t"hello[^/\\]*world")
+      .assert(_ == t"hello[^/\\\\]*world")
       
       test(t"Parse a glob with a question mark"):
         Glob.parse(t"hello?world").regex
-      .assert(_ == t"hello[^/\\]world")
+      .assert(_ == t"hello[^/\\\\]world")
       
       test(t"Parse a glob with a range"):
         Glob.parse(t"hello[a-z]world").regex
@@ -289,7 +289,31 @@ object Tests extends Suite(t"Kaleidoscope tests"):
       test(t"Parse a glob excluding a range of characters"):
         Glob.parse(t"hello[!a-z]world").regex
       .assert(_ == t"hello[^a-z]world")
-        
+    
+      test(t"Extract from a glob"):
+        t"/home/work/docs" match
+          case g"/$home/work/docs" => home
+      .assert(_ == t"home")
+      
+      test(t"Extract from a glob with a star"):
+        t"/home/work/docs" match
+          case g"/$home/*/docs" => home
+      .assert(_ == t"home")
+      
+      test(t"Extract from a glob with question marks"):
+        t"/home/work/docs" match
+          case g"/$home/????/docs" => home
+      .assert(_ == t"home")
+      
+      test(t"Extract from a glob with two extractions"):
+        t"/home/work/docs" match
+          case g"/$home/$work/docs" => (home, work)
+      .assert(_ == (t"home", t"work"))
+      
+      test(t"Extract from a glob with globstar"):
+        t"/home/work/docs" match
+          case g"/$home/**" => home
+      .assert(_ == t"home")
 
     suite(t"Compiler tests"): 
       test(t"brackets must be matched"):

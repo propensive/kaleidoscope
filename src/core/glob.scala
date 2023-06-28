@@ -28,8 +28,8 @@ enum GlobToken:
 
   def regex: String = this match
     case Exact(char) => (if GlobToken.needsEscaping.contains(char) then "\\" else "")+char
-    case Star        => "[^/\\]*"
-    case OneChar     => "[^/\\]"
+    case Star        => "[^/\\\\]*"
+    case OneChar     => "[^/\\\\]"
     case Globstar    => ".*"
     
     case Range(start, end, inverse) =>
