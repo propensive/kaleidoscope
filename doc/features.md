@@ -3,3 +3,4 @@
 - extraction of capturing groups in patterns
 - typed extraction (into `List`s or `Option`s) of variable-length capturing groups
 - static verification of regular expression syntax
+- simpler "glob" syntax is also provided
