@@ -18,6 +18,7 @@ directly in a `case` pattern, and do not need to be predefined.
 - extraction of capturing groups in patterns
 - typed extraction (into `List`s or `Option`s) of variable-length capturing groups
 - static verification of regular expression syntax
+- simpler "glob" syntax is also provided
 
 
 ## Availability
@@ -115,7 +116,7 @@ be used, but caution should be taken if there is a mismatch between the
 project's stability level and the importance of your own project.
 
 Kaleidoscope is designed to be _small_. Its entire source code currently consists
-of 473 lines of code.
+of 499 lines of code.
 
 ## Building
 
