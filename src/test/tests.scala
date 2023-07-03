@@ -28,7 +28,7 @@ object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
 
     suite(t"Regex tests"):
-      import Regex.Group, Regex.Quantifier.*, Regex.Greediness.*
+      import Regex.Group, Regex.Quantifier.*, Regex.Greed.*
 
       suite(t"Standard parsing"):
         test(t"Parse aaa")(Regex.parse(List(t"aaa"))).assert(_ == Regex(t"aaa", Nil))

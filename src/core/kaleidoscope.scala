@@ -44,12 +44,10 @@ class Extractor[ResultType](parts: Seq[String]):
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
 object Kaleidoscope:
-
   def glob(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     val parts = sc.value.get.parts.map(Text(_)).map(Glob.parse(_).regex.s).to(List)
-    val parts2 = parts.head :: parts.tail.map("([^/\\\\]*)"+_)
     
-    extractor(parts2)
+    extractor(parts.head :: parts.tail.map("([^/\\\\]*)"+_))
 
   def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     extractor(sc.value.get.parts.to(List))
