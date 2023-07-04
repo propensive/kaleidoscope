@@ -28,30 +28,31 @@ object InvalidRegexError:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
         IncompleteRepetition
     
-    def message: Text = this match
-      case UnclosedGroup =>
-        Text("a capturing group was not closed")
+    def message: Message = Message:
+      this match
+        case UnclosedGroup =>
+          Text("a capturing group was not closed")
       
-      case ExpectedGroup =>
-        Text("a capturing group was expected immediately following an extractor")
+        case ExpectedGroup =>
+          Text("a capturing group was expected immediately following an extractor")
       
-      case BadRepetition =>
-        Text("the maximum number of repetitions is less than the minimum")
+        case BadRepetition =>
+          Text("the maximum number of repetitions is less than the minimum")
       
-      case Uncapturable =>
-        Text("a capturing group inside a repeating group can not be extracted")
+        case Uncapturable =>
+          Text("a capturing group inside a repeating group can not be extracted")
       
-      case UnexpectedChar =>
-        Text("the repetition range contained an unexpected character")
+        case UnexpectedChar =>
+          Text("the repetition range contained an unexpected character")
       
-      case NotInGroup =>
-        Text("a closing parenthesis was found without a corresponding opening parenthesis")
+        case NotInGroup =>
+          Text("a closing parenthesis was found without a corresponding opening parenthesis")
 
-      case IncompleteRepetition =>
-        Text("the repetition range was not closed")
+        case IncompleteRepetition =>
+          Text("the repetition range was not closed")
 
 case class InvalidRegexError(reason: InvalidRegexError.Reason)
-extends Error(ErrorMessage(List(Text("the regular expression could not be parsed because "),
+extends Error(Message(List(Text("the regular expression could not be parsed because "),
     Text("")), List(reason.message)))
 
 import InvalidRegexError.Reason.*
