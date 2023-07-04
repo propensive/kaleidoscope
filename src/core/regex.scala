@@ -101,6 +101,8 @@ object Regex:
   def unsafeParse(parts: Seq[String]): Regex =
     try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
   
+  def apply(text: Text): Regex throws InvalidRegexError = parse(List(text))
+
   def parse(parts: List[Text]): Regex throws InvalidRegexError =
     (parts: @unchecked) match
       case head :: tail =>
