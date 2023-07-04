@@ -27,33 +27,32 @@ object InvalidRegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
         IncompleteRepetition
+  
+  object Reason:
+    given AsMessage[Reason] =
+      case UnclosedGroup =>
+        Message(Text("a capturing group was not closed"))
     
-    def message: Message = Message:
-      this match
-        case UnclosedGroup =>
-          Text("a capturing group was not closed")
-      
-        case ExpectedGroup =>
-          Text("a capturing group was expected immediately following an extractor")
-      
-        case BadRepetition =>
-          Text("the maximum number of repetitions is less than the minimum")
-      
-        case Uncapturable =>
-          Text("a capturing group inside a repeating group can not be extracted")
-      
-        case UnexpectedChar =>
-          Text("the repetition range contained an unexpected character")
-      
-        case NotInGroup =>
-          Text("a closing parenthesis was found without a corresponding opening parenthesis")
+      case ExpectedGroup =>
+        Message(Text("a capturing group was expected immediately following an extractor"))
+    
+      case BadRepetition =>
+        Message(Text("the maximum number of repetitions is less than the minimum"))
+    
+      case Uncapturable =>
+        Message(Text("a capturing group inside a repeating group can not be extracted"))
+    
+      case UnexpectedChar =>
+        Message(Text("the repetition range contained an unexpected character"))
+    
+      case NotInGroup =>
+        Message(Text("a closing parenthesis was found without a corresponding opening parenthesis"))
 
-        case IncompleteRepetition =>
-          Text("the repetition range was not closed")
+      case IncompleteRepetition =>
+        Message(Text("the repetition range was not closed"))
 
 case class InvalidRegexError(reason: InvalidRegexError.Reason)
-extends Error(Message(List(Text("the regular expression could not be parsed because "),
-    Text("")), List(reason.message)))
+extends Error(msg"the regular expression could not be parsed because $reason")
 
 import InvalidRegexError.Reason.*
 
