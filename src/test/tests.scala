@@ -317,14 +317,14 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
     suite(t"Compiler tests"): 
       test(t"brackets must be matched"):
-        captureCompileErrors:
+        demilitarize:
           t"" match
             case r"hello(world" =>
         .head.message
       .assert(_.contains("kaleidoscope: the regular expression could not be parsed because a capturing group was not closed"))
       
       test(t"variable must be bound"):
-        captureCompileErrors:
+        demilitarize:
           t"" match
             case r"hello${space}world" =>
         .head.message
