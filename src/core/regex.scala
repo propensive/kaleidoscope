@@ -226,7 +226,9 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
   private[kaleidoscope] lazy val javaPattern: Pattern =
     Regex.cache.computeIfAbsent(capturePattern.s, Pattern.compile(_)).nn
 
-  def matches(text: Text): Option[IArray[Text | List[Text] | Option[Text]]] =
+  def matches(text: Text): Boolean = !matchGroups(text).isEmpty
+
+  def matchGroups(text: Text): Option[IArray[Text | List[Text] | Option[Text]]] =
     val matcher = javaPattern.matcher(text.s).nn
     
     def recur

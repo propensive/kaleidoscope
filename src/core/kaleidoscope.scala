@@ -35,11 +35,11 @@ extension (ctx: StringContext)
 
 class NoExtraction(pattern: String):
   def unapply(scrutinee: Text): Boolean =
-    !Regex.unsafeParse(List(pattern)).matches(scrutinee).isEmpty
+    Regex.unsafeParse(List(pattern)).matches(scrutinee)
 
 class Extractor[ResultType](parts: Seq[String]):
   def unapply(scrutinee: Text): ResultType =
-    val result = Regex.unsafeParse(parts).matches(scrutinee)
+    val result = Regex.unsafeParse(parts).matchGroups(scrutinee)
     if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
