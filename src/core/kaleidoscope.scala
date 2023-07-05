@@ -56,7 +56,7 @@ object Kaleidoscope:
     import quotes.reflect.*
 
     val regex = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
-      case err@InvalidRegexError(_) => fail(err.message.text.s)
+      case err@InvalidRegexError(_) => fail(err.message)
 
     val types = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
