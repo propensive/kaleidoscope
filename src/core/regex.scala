@@ -219,6 +219,8 @@ object Regex:
         makePattern(pattern, tail, head.outerEnd, Text(partial), end, index3)
 
 case class Regex(pattern: Text, groups: List[Regex.Group]):
+  def unapply(text: Text): Boolean = text.s.matches(pattern.s)
+
   lazy val capturePattern: Text =
     Regex.makePattern(pattern, groups, 0, Text(""), pattern.s.length, 0)(1)
   
