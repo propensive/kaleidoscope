@@ -26,30 +26,33 @@ import language.experimental.captureChecking
 object InvalidRegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
-        IncompleteRepetition
+        IncompleteRepetition, InvalidPattern
   
   object Reason:
     given AsMessage[Reason] =
       case UnclosedGroup =>
-        Message(Text("a capturing group was not closed"))
+        msg"a capturing group was not closed"
     
       case ExpectedGroup =>
-        Message(Text("a capturing group was expected immediately following an extractor"))
+        msg"a capturing group was expected immediately following an extractor"
     
       case BadRepetition =>
-        Message(Text("the maximum number of repetitions is less than the minimum"))
+        msg"the maximum number of repetitions is less than the minimum"
     
       case Uncapturable =>
-        Message(Text("a capturing group inside a repeating group can not be extracted"))
+        msg"a capturing group inside a repeating group can not be extracted"
     
       case UnexpectedChar =>
-        Message(Text("the repetition range contained an unexpected character"))
+        msg"the repetition range contained an unexpected character"
     
       case NotInGroup =>
-        Message(Text("a closing parenthesis was found without a corresponding opening parenthesis"))
+        msg"a closing parenthesis was found without a corresponding opening parenthesis"
 
       case IncompleteRepetition =>
-        Message(Text("the repetition range was not closed"))
+        msg"the repetition range was not closed"
+      
+      case InvalidPattern =>
+        msg"the pattern was invalid"
 
 case class InvalidRegexError(reason: InvalidRegexError.Reason)
 extends Error(msg"the regular expression could not be parsed because $reason")
@@ -216,7 +219,6 @@ object Regex:
         makePattern(pattern, tail, head.outerEnd, Text(partial), end, index3)
 
 case class Regex(pattern: Text, groups: List[Regex.Group]):
-  
   lazy val capturePattern: Text =
     Regex.makePattern(pattern, groups, 0, Text(""), pattern.s.length, 0)(1)
   

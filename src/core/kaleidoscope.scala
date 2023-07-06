@@ -28,12 +28,8 @@ extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
   transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
 
-extension (ctx: StringContext)
-  def r(args: String*): Regex throws InvalidRegexError =
-    Regex.parse(List(Text(ctx.parts.zip(args.map(Pattern.quote(_))).map(_+_).mkString+
-        ctx.parts.last)))
-
 class NoExtraction(pattern: String):
+  inline def apply(): Regex = Regex.unsafeParse(List(pattern))
   def unapply(scrutinee: Text): Boolean =
     Regex.unsafeParse(List(pattern)).matches(scrutinee)
 
@@ -66,6 +62,10 @@ object Kaleidoscope:
     lazy val tupleType =
       if types.length == 1 then types.head
       else AppliedType(defn.TupleClass(types.length).info.typeSymbol.typeRef, types)
+
+    try Pattern.compile(parts.ss.mkString)
+    catch case err: PatternSyntaxException =>
+      fail(InvalidRegexError(InvalidRegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
     else (tupleType.asType: @unchecked) match
