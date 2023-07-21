@@ -63,7 +63,7 @@ object Kaleidoscope:
       if types.length == 1 then types.head
       else AppliedType(defn.TupleClass(types.length).info.typeSymbol.typeRef, types)
 
-    try Pattern.compile(parts.ss.mkString)
+    try Pattern.compile(parts.mkString)
     catch case err: PatternSyntaxException =>
       fail(InvalidRegexError(InvalidRegexError.Reason.InvalidPattern).message)
 
