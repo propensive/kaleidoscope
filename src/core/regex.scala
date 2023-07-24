@@ -16,6 +16,7 @@
 
 package kaleidoscope
 
+import anticipation.*
 import rudiments.*
 
 import java.util.regex.*

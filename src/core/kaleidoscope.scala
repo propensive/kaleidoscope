@@ -16,6 +16,7 @@
 
 package kaleidoscope
 
+import anticipation.*
 import rudiments.*
 
 import scala.quoted.*
