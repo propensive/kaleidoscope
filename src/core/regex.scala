@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import language.experimental.captureChecking
 
-object InvalidRegexError:
+object RegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
         IncompleteRepetition, InvalidPattern
@@ -55,10 +55,10 @@ object InvalidRegexError:
       case InvalidPattern =>
         msg"the pattern was invalid"
 
-case class InvalidRegexError(reason: InvalidRegexError.Reason)
+case class RegexError(reason: RegexError.Reason)
 extends Error(msg"the regular expression could not be parsed because $reason")
 
-import InvalidRegexError.Reason.*
+import RegexError.Reason.*
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
@@ -103,14 +103,14 @@ object Regex:
       else (index2, Text(s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})"))
 
   def unsafeParse(parts: Seq[String]): Regex =
-    try parse(parts.to(List).map(Text(_))) catch case _: InvalidRegexError => ???
+    try parse(parts.to(List).map(Text(_))) catch case _: RegexError => ???
   
-  def apply(text: Text): Regex throws InvalidRegexError = parse(List(text))
+  def apply(text: Text): Regex throws RegexError = parse(List(text))
 
-  def parse(parts: List[Text]): Regex throws InvalidRegexError =
+  def parse(parts: List[Text]): Regex throws RegexError =
     (parts: @unchecked) match
       case head :: tail =>
-        if !tail.forall(_.s.startsWith("(")) then throw InvalidRegexError(ExpectedGroup)
+        if !tail.forall(_.s.startsWith("(")) then throw RegexError(ExpectedGroup)
     
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
@@ -151,12 +151,12 @@ object Regex:
                 Quantifier.AtLeast(n)
               
               case m =>
-                if m < n then throw InvalidRegexError(BadRepetition) else Quantifier.Between(n, m)
+                if m < n then throw RegexError(BadRepetition) else Quantifier.Between(n, m)
           
           case _ =>
-            throw InvalidRegexError(UnexpectedChar)
+            throw RegexError(UnexpectedChar)
         
-        if cur() != '}' then throw InvalidRegexError(UnexpectedChar) else quantifier.adv()
+        if cur() != '}' then throw RegexError(UnexpectedChar) else quantifier.adv()
       
       case _ =>
         Quantifier.Exactly(1)
@@ -164,26 +164,26 @@ object Regex:
     @tailrec
     def number(required: Boolean, num: Int = 0, first: Boolean = true): Int = cur() match
       case '\u0000' =>
-        throw InvalidRegexError(IncompleteRepetition)
+        throw RegexError(IncompleteRepetition)
       
       case ch if ch.isDigit =>
         index += 1
         number(required, num*10 + (ch - '0').toInt, false)
       
       case other =>
-        if first && required then throw InvalidRegexError(UnexpectedChar) else num
+        if first && required then throw RegexError(UnexpectedChar) else num
 
     def group(start: Int, children: List[Group], top: Boolean): Group =
       cur() match
         case '\u0000' =>
-          if !top then throw InvalidRegexError(UnclosedGroup)
+          if !top then throw RegexError(UnclosedGroup)
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
               Quantifier.Exactly(1), Greed.Greedy, captured.contains(start - 1))
         case '(' =>
           index += 1
           group(start, group(index, Nil, false) :: children, top)
         case ')' =>
-          if top then throw InvalidRegexError(NotInGroup)
+          if top then throw RegexError(NotInGroup)
           val end = index
           index += 1
           val quant = quantifier()
@@ -198,7 +198,7 @@ object Regex:
     
     def check(groups: List[Group], canCapture: Boolean): Unit =
       groups.foreach: group =>
-        if !canCapture && group.capture then throw InvalidRegexError(Uncapturable)
+        if !canCapture && group.capture then throw RegexError(Uncapturable)
         check(group.groups, canCapture && group.quantifier.unitary)
     
     check(mainGroup.groups, true)

@@ -52,8 +52,8 @@ object Kaleidoscope:
   private def extractor(parts: List[String])(using Quotes): Expr[Any] =
     import quotes.reflect.*
 
-    val regex = try Regex.parse(parts.map(Text(_))) catch case err: InvalidRegexError => err match
-      case err@InvalidRegexError(_) => fail(err.message)
+    val regex = try Regex.parse(parts.map(Text(_))) catch case err: RegexError => err match
+      case err@RegexError(_) => fail(err.message)
 
     val types = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
@@ -66,7 +66,7 @@ object Kaleidoscope:
 
     try Pattern.compile(parts.mkString)
     catch case err: PatternSyntaxException =>
-      fail(InvalidRegexError(InvalidRegexError.Reason.InvalidPattern).message)
+      fail(RegexError(RegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
     else (tupleType.asType: @unchecked) match
