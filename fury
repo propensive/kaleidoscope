@@ -10,7 +10,7 @@ project kaleidoscope
   module core
     compiler  scala
     sources   src/core
-    include   rudiments/core
+    include   rudiments/core perforate/core
 
   module test
     compiler  scala

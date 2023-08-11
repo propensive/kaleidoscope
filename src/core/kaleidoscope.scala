@@ -19,6 +19,7 @@ package kaleidoscope
 import anticipation.*
 import rudiments.*
 import fulminate.*
+import perforate.*
 
 import scala.quoted.*
 
@@ -53,8 +54,7 @@ object Kaleidoscope:
   private def extractor(parts: List[String])(using Quotes): Expr[Any] =
     import quotes.reflect.*
 
-    val regex = try Regex.parse(parts.map(Text(_))) catch case err: RegexError => err match
-      case err@RegexError(_) => fail(err.message)
+    val regex = failCompilation(Regex.parse(parts.map(Text(_))))
 
     val types = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]

@@ -18,6 +18,7 @@ package kaleidoscope
 
 import anticipation.*
 import rudiments.*
+import perforate.*
 import fulminate.*
 
 import java.util.regex.*
@@ -104,14 +105,15 @@ object Regex:
       else (index2, Text(s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})"))
 
   def unsafeParse(parts: Seq[String]): Regex =
-    try parse(parts.to(List).map(Text(_))) catch case _: RegexError => ???
+    import errorHandlers.throwUnsafely
+    parse(parts.to(List).map(Text(_)))
   
-  def apply(text: Text): Regex throws RegexError = parse(List(text))
+  def apply(text: Text)(using Raises[RegexError]): Regex = parse(List(text))
 
-  def parse(parts: List[Text]): Regex throws RegexError =
+  def parse(parts: List[Text])(using Raises[RegexError]): Regex =
     (parts: @unchecked) match
       case head :: tail =>
-        if !tail.forall(_.s.startsWith("(")) then throw RegexError(ExpectedGroup)
+        if !tail.forall(_.s.startsWith("(")) then abort(RegexError(ExpectedGroup))
     
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
@@ -152,12 +154,12 @@ object Regex:
                 Quantifier.AtLeast(n)
               
               case m =>
-                if m < n then throw RegexError(BadRepetition) else Quantifier.Between(n, m)
+                if m < n then abort(RegexError(BadRepetition)) else Quantifier.Between(n, m)
           
           case _ =>
-            throw RegexError(UnexpectedChar)
+            abort(RegexError(UnexpectedChar))
         
-        if cur() != '}' then throw RegexError(UnexpectedChar) else quantifier.adv()
+        if cur() != '}' then abort(RegexError(UnexpectedChar)) else quantifier.adv()
       
       case _ =>
         Quantifier.Exactly(1)
@@ -165,26 +167,26 @@ object Regex:
     @tailrec
     def number(required: Boolean, num: Int = 0, first: Boolean = true): Int = cur() match
       case '\u0000' =>
-        throw RegexError(IncompleteRepetition)
+        abort(RegexError(IncompleteRepetition))
       
       case ch if ch.isDigit =>
         index += 1
         number(required, num*10 + (ch - '0').toInt, false)
       
       case other =>
-        if first && required then throw RegexError(UnexpectedChar) else num
+        if first && required then abort(RegexError(UnexpectedChar)) else num
 
     def group(start: Int, children: List[Group], top: Boolean): Group =
       cur() match
         case '\u0000' =>
-          if !top then throw RegexError(UnclosedGroup)
+          if !top then abort(RegexError(UnclosedGroup))
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
               Quantifier.Exactly(1), Greed.Greedy, captured.contains(start - 1))
         case '(' =>
           index += 1
           group(start, group(index, Nil, false) :: children, top)
         case ')' =>
-          if top then throw RegexError(NotInGroup)
+          if top then abort(RegexError(NotInGroup))
           val end = index
           index += 1
           val quant = quantifier()
@@ -199,7 +201,7 @@ object Regex:
     
     def check(groups: List[Group], canCapture: Boolean): Unit =
       groups.foreach: group =>
-        if !canCapture && group.capture then throw RegexError(Uncapturable)
+        if !canCapture && group.capture then abort(RegexError(Uncapturable))
         check(group.groups, canCapture && group.quantifier.unitary)
     
     check(mainGroup.groups, true)
