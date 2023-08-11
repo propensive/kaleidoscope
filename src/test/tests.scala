@@ -21,8 +21,9 @@ import rudiments.*
 import spectacular.*
 import gossamer.*
 import larceny.*
+import perforate.*
 
-import unsafeExceptions.canThrowAny
+import errorHandlers.throwUnsafely
 
 object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
