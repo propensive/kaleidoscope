@@ -32,7 +32,7 @@ object RegexError:
         IncompleteRepetition, InvalidPattern
   
   object Reason:
-    given AsMessage[Reason] =
+    given MessageShow[Reason] =
       case UnclosedGroup =>
         msg"a capturing group was not closed"
     
