@@ -104,7 +104,7 @@ object Regex:
       if quantifier.unitary then (index2, Text(s"($groupName$subpattern)"))
       else (index2, Text(s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})"))
 
-  def unsafeParse(parts: Seq[String]): Regex =
+  def make(parts: Seq[String])(using Unsafe.type): Regex =
     import errorHandlers.throwUnsafely
     parse(parts.to(List).map(Text(_)))
   

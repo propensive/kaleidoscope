@@ -32,13 +32,13 @@ extension (inline ctx: StringContext)
   transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
 
 class NoExtraction(pattern: String):
-  inline def apply(): Regex = Regex.unsafeParse(List(pattern))
+  inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
   def unapply(scrutinee: Text): Boolean =
-    Regex.unsafeParse(List(pattern)).matches(scrutinee)
+    Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
 
 class Extractor[ResultType](parts: Seq[String]):
   def unapply(scrutinee: Text): ResultType =
-    val result = Regex.unsafeParse(parts).matchGroups(scrutinee)
+    val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
     if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
     else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
 
