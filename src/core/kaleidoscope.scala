@@ -25,7 +25,7 @@ import scala.quoted.*
 
 import java.util.regex.*
 
-import language.experimental.captureChecking
+//import language.experimental.captureChecking
 
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
