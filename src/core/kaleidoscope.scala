@@ -25,7 +25,7 @@ import scala.quoted.*
 
 import java.util.regex.*
 
-//import language.experimental.captureChecking
+import language.experimental.captureChecking
 
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
@@ -39,8 +39,11 @@ class NoExtraction(pattern: String):
 class Extractor[ResultType](parts: Seq[String]):
   def unapply(scrutinee: Text): ResultType =
     val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
-    if parts.length == 2 then result.map(_.head).asInstanceOf[ResultType]
-    else result.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
+    // FIXME: Stop using `Array` when capture checking is working again
+    val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Option[Text]]]]
+
+    if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
+    else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
 
 object Kaleidoscope:
   def glob(sc: Expr[StringContext])(using Quotes): Expr[Any] =
