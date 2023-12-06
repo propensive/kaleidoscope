@@ -126,7 +126,7 @@ object Regex:
     var index: Int = 0
     
     def cur(): Char = if index >= text.s.length then '\u0000' else text.s.charAt(index)
-    extension [ValueType](value: ValueType) def adv(): ValueType = value.tap { _ => index += 1 }
+    extension [ValueType](value: ValueType) def adv(): ValueType = value.also { index += 1 }
     
     def greed(): Greed = cur() match
       case '?' => Greed.Reluctant.adv()
