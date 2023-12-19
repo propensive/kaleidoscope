@@ -17,7 +17,7 @@
 package kaleidoscope
 
 import anticipation.*
-import rudiments.*
+import vacuous.*
 import fulminate.*
 import perforate.*
 
