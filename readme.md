@@ -35,16 +35,21 @@ import kaleidoscope.*
 and you can then use a Kaleidoscope regular expression—a string prefixed with
 the letter `r`—anywhere you can use a pattern in Scala. For example,
 ```scala
-path match
-  case r"/images/.*" => println("image")
-  case r"/styles/.*" => println("stylesheet")
-  case _             => println("something else")
+import anticipation.Text
+
+def describe(path: Text): Unit =
+  path match
+    case r"/images/.*" => println("image")
+    case r"/styles/.*" => println("stylesheet")
+    case _             => println("something else")
 ```
 or,
 ```scala
-email match
-  case r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,6}$$" => Some(email)
-  case _                                            => None
+import vacuous.{Optional, Unset}
+
+def validate(email: Text): Optional[Text] = email match
+  case r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,6}$$" => email
+  case _                                            => Unset
 ```
 
 Such patterns will either match or not, however should they match, it is
@@ -57,16 +62,24 @@ immediately prior to the capturing group, as `$identifier` or `${identifier}`.
 
 Here is an example:
 ```scala
-path match
-  case r"/images/${img}(.*)"  => Image(img)
-  case r"/styles/$styles(.*)" => Stylesheet(styles)
+enum FileType:
+  case Image(text: Text)
+  case Stylesheet(text: Text)
+
+def identify(path: Text): FileType = path match
+  case r"/images/${img}(.*)"  => FileType.Image(img)
+  case r"/styles/$styles(.*)" => FileType.Stylesheet(styles)
 ```
 
 Alternatively, this can be extracted directly in a `val` definition, like so:
 ```scala
-val r"^[a-z0-9._%+-]+@$domain([a-z0-9.-]+\.$tld([a-z]{2,6})$$" = "test@example.com"
-> domain: String = "example.com"
-> tld: String = "com"
+val r"^[a-z0-9._%+-]+@$domain([a-z0-9.-]+\.$tld([a-z]{2,6}))$$" =
+  "test@example.com": @unchecked
+```
+In the REPL, this would bind the following values:
+```
+> domain: Text = t"example.com"
+> tld: Text = t"com"
 ```
 
 In addition, the syntax of the regular expressionwill be checked at compile-time, and any
@@ -84,7 +97,9 @@ will extract a value with the type `Option[Text]`.
 
 For example, see how `init` is extracted as a `List[Text]`, below:
 ```scala
-"parsley, sage, rosemary, and thyme" match
+import gossamer.{drop, Rtl}
+
+def parseList(): List[Text] = "parsley, sage, rosemary, and thyme" match
   case r"$only([a-z]+)"                      => List(only)
   case r"$first([a-z]+) and $second([a-z]+)" => List(first, second)
   case r"$init([a-z]+, )*and $last([a-z]+)"  => init.map(_.drop(2, Rtl)) :+ last
