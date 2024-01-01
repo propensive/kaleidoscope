@@ -84,3 +84,4 @@ to be escaped, with the exception of `$` which should be written as `$$`. It is
 still necessary, however, to follow the regular expression escaping rules, for
 example, an extractor matching a single opening parenthesis would be written as
 `r"\("` or `r"""\("""`.
+
