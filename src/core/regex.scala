@@ -114,7 +114,7 @@ object Regex:
   def parse(parts: List[Text])(using Raises[RegexError]): Regex =
     (parts: @unchecked) match
       case head :: tail =>
-        if !tail.forall(_.s.startsWith("(")) then abort(RegexError(ExpectedGroup))
+        if !tail.all(_.s.startsWith("(")) then abort(RegexError(ExpectedGroup))
     
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
