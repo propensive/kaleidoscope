@@ -24,8 +24,8 @@ directly in a `case` pattern, and do not need to be predefined.
 ## Availability Plan
 
 Kaleidoscope has not yet been published. The medium-term plan is to build Kaleidoscope
-with [Fury](/propensive/fury) and to publish it as a source build on
-[Vent](/propensive/vent). This will enable ordinary users to write and build
+with [Fury](https://github.com/propensive/fury) and to publish it as a source build on
+[Vent](https://github.com/propensive/vent). This will enable ordinary users to write and build
 software which depends on Kaleidoscope.
 
 Subsequently, Kaleidoscope will also be made available as a binary in the Maven
@@ -121,6 +121,7 @@ to be escaped, with the exception of `$` which should be written as `$$`. It is
 still necessary, however, to follow the regular expression escaping rules, for
 example, an extractor matching a single opening parenthesis would be written as
 `r"\("` or `r"""\("""`.
+
 
 
 
