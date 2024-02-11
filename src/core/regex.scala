@@ -19,7 +19,7 @@ package kaleidoscope
 import anticipation.*
 import vacuous.*
 import rudiments.*
-import perforate.*
+import contingency.*
 import fulminate.*
 
 import java.util.regex.*

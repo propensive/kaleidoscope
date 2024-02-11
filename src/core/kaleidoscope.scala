@@ -19,7 +19,7 @@ package kaleidoscope
 import anticipation.*
 import vacuous.*
 import fulminate.*
-import perforate.*
+import contingency.*
 
 import scala.quoted.*
 
