@@ -27,6 +27,8 @@ import java.util.regex.*
 
 import language.experimental.captureChecking
 
+given Realm = realm"kaleidoscope"
+
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
   transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
