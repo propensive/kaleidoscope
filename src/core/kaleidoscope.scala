@@ -27,8 +27,6 @@ import java.util.regex.*
 
 import language.experimental.captureChecking
 
-given Realm = realm"kaleidoscope"
-
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
   transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
@@ -48,6 +46,8 @@ class Extractor[ResultType](parts: Seq[String]):
     else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
 
 object Kaleidoscope:
+  given Realm = realm"kaleidoscope"
+  
   def glob(sc: Expr[StringContext])(using Quotes): Expr[Any] =
     val parts = sc.value.get.parts.map(Text(_)).map(Glob.parse(_).regex.s).to(List)
     
