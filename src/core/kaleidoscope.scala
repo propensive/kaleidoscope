@@ -33,13 +33,13 @@ extension (inline ctx: StringContext)
 
 class NoExtraction(pattern: String):
   inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
-  def unapply(scrutinee: Text): Boolean =
-    Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
+  def unapply(scrutinee: Text): Boolean = Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
 
 class Extractor[ResultType](parts: Seq[String]):
   def unapply(scrutinee: Text): ResultType =
     val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
-    // FIXME: Stop using `Array` when capture checking is working again
+    
+    // FIXME: [#39] Stop using `Array` when capture checking is working again
     val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Option[Text]]]]
 
     if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
@@ -53,8 +53,7 @@ object Kaleidoscope:
     
     extractor(parts.head :: parts.tail.map("([^/\\\\]*)"+_))
 
-  def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] =
-    extractor(sc.value.get.parts.to(List))
+  def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] = extractor(sc.value.get.parts.to(List))
 
   private def extractor(parts: List[String])(using Quotes): Expr[Any] =
     import quotes.reflect.*
