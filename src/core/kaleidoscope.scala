@@ -31,20 +31,6 @@ extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
   transparent inline def g: Any = ${Kaleidoscope.glob('ctx)}
 
-class NoExtraction(pattern: String):
-  inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
-  def unapply(scrutinee: Text): Boolean = Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
-
-class Extractor[ResultType](parts: Seq[String]):
-  def unapply(scrutinee: Text): ResultType =
-    val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
-    
-    // FIXME: [#39] Stop using `Array` when capture checking is working again
-    val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Option[Text]]]]
-
-    if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
-    else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
-
 object Kaleidoscope:
   given Realm = realm"kaleidoscope"
   
@@ -75,4 +61,18 @@ object Kaleidoscope:
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
     else (tupleType.asType: @unchecked) match
-      case '[resultType] => '{Extractor[Option[resultType]](${Expr(parts)})}
+      case '[resultType] => '{RExtractor[Option[resultType]](${Expr(parts)})}
+
+  class NoExtraction(pattern: String):
+    inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
+    def unapply(scrutinee: Text): Boolean = Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
+
+  class RExtractor[ResultType](parts: Seq[String]):
+    def unapply(scrutinee: Text): ResultType =
+      val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
+      
+      // FIXME: [#39] Stop using `Array` when capture checking is working again
+      val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Option[Text]]]]
+
+      if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
+      else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
