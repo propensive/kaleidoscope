@@ -10,7 +10,8 @@
 
 ecosystem vent 3 https://github.com/propensive/vent main
 
-command build kaleidoscope/core
+command compile kaleidoscope/core
+default compile
 
 project kaleidoscope
   name         Kaleidoscope
@@ -20,7 +21,7 @@ project kaleidoscope
   module core
     compiler  scala
     sources   src/core
-    include   rudiments/core  contingency/core
+    include   contingency/core
 
 ##
 
