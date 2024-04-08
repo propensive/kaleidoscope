@@ -16,6 +16,7 @@ default compile
 project kaleidoscope
   name         Kaleidoscope
   website      https://github.com/propensive/kaleidoscope
+  license      apache-2
   description  Statically-checked inline matching on regular expressions
 
   module core
