@@ -113,9 +113,9 @@ object Regex:
     import errorHandlers.throwUnsafely
     parse(parts.to(List).map(_.tt))
   
-  def apply(text: Text)(using Raises[RegexError]): Regex = parse(List(text))
+  def apply(text: Text)(using Errant[RegexError]): Regex = parse(List(text))
 
-  def parse(parts: List[Text])(using Raises[RegexError]): Regex =
+  def parse(parts: List[Text])(using Errant[RegexError]): Regex =
     (parts: @unchecked) match
       case head :: tail =>
         if !tail.all(_.s.startsWith("(")) then abort(RegexError(ExpectedGroup))
