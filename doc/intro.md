@@ -1,5 +1,9 @@
-Kaleidoscope is a small library which provides pattern matching using regular
-expressions, and extraction of capturing groups into values, which are typed
-according to the repetition of the group. Patterns can be written inline,
-directly in a `case` pattern, and do not need to be predefined.
+Kaleidoscope is a small library to make pattern matching against strings more pleasant. Regular
+expressions can be written directly in patterns, and capturing groups bound directly to variables,
+typed according to the group's repetition. Here is an example:
+```amok scala
+case class Email(user: Text, domain: Text)
 
+email match
+  case r"$user([^@]+)@$domain(.*)" => Email(name, domain)
+```

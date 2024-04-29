@@ -39,7 +39,8 @@ object Kaleidoscope:
     
     extractor(parts.head :: parts.tail.map("([^/\\\\]*)"+_))
 
-  def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] = extractor(sc.value.get.parts.to(List))
+  def regex(sc: Expr[StringContext])(using Quotes): Expr[Any] =
+    extractor(sc.value.get.parts.to(List))
 
   private def extractor(parts: List[String])(using Quotes): Expr[Any] =
     import quotes.reflect.*
@@ -65,7 +66,9 @@ object Kaleidoscope:
 
   class NoExtraction(pattern: String):
     inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
-    def unapply(scrutinee: Text): Boolean = Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
+    
+    def unapply(scrutinee: Text): Boolean =
+      Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
 
   class RExtractor[ResultType](parts: Seq[String]):
     def unapply(scrutinee: Text): ResultType =
