@@ -79,3 +79,4 @@ object Kaleidoscope:
 
       if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
       else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
+
