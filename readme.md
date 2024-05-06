@@ -6,10 +6,15 @@
 
 __Statically-checked inline matching on regular expressions__
 
-Kaleidoscope is a small library which provides pattern matching using regular
-expressions, and extraction of capturing groups into values, which are typed
-according to the repetition of the group. Patterns can be written inline,
-directly in a `case` pattern, and do not need to be predefined.
+Kaleidoscope is a small library to make pattern matching against strings more pleasant. Regular
+expressions can be written directly in patterns, and capturing groups bound directly to variables,
+typed according to the group's repetition. Here is an example:
+```amok scala
+case class Email(user: Text, domain: Text)
+
+email match
+  case r"$user([^@]+)@$domain(.*)" => Email(name, domain)
+```
 
 ## Features
 
@@ -127,7 +132,7 @@ example, an extractor matching a single opening parenthesis would be written as
 
 ## Status
 
-Kaleidoscope is classified as __maturescent__. For reference, Scala One projects are
+Kaleidoscope is classified as __maturescent__. For reference, Soundness projects are
 categorized into one of the following five stability levels:
 
 - _embryonic_: for experimental or demonstrative purposes only, without any guarantees of longevity
@@ -141,7 +146,7 @@ as long as caution is taken to avoid a mismatch between the project's stability
 level and the required stability and maintainability of your own project.
 
 Kaleidoscope is designed to be _small_. Its entire source code currently consists
-of 520 lines of code.
+of 522 lines of code.
 
 ## Building
 
@@ -210,7 +215,7 @@ O&Uuml;](https://propensive.com/).
 
 Kaleidoscope is named after the optical instrument which shows pretty patterns to its user, while the library also works closely with patterns.
 
-In general, Scala One project names are always chosen with some rationale,
+In general, Soundness project names are always chosen with some rationale,
 however it is usually frivolous. Each name is chosen for more for its
 _uniqueness_ and _intrigue_ than its concision or catchiness, and there is no
 bias towards names with positive or "nice" meanings—since many of the libraries
