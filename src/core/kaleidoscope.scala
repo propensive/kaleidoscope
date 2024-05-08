@@ -47,17 +47,16 @@ object Kaleidoscope:
 
     val regex = failCompilation(Regex.parse(parts.map(Text(_))))
 
-    val types = regex.captureGroups.map(_.quantifier).map:
+    val types: List[TypeRepr] = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
-      case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Option[Text]]
+      case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Optional[Text]]
       case _                              => TypeRepr.of[List[Text]]
 
     lazy val tupleType =
       if types.length == 1 then types.head
       else AppliedType(defn.TupleClass(types.length).info.typeSymbol.typeRef, types)
 
-    try Pattern.compile(parts.mkString)
-    catch case err: PatternSyntaxException =>
+    try Pattern.compile(parts.mkString) catch case err: PatternSyntaxException =>
       fail(RegexError(RegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
@@ -75,7 +74,7 @@ object Kaleidoscope:
       val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
 
       // FIXME: [#39] Stop using `Array` when capture checking is working again
-      val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Option[Text]]]]
+      val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Optional[Text]]]]
 
       if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
       else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]

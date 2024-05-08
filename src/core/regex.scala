@@ -242,11 +242,11 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
   def matches(text: Text): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text): Option[IArray[Text | List[Text] | Option[Text]]] =
+  def matchGroups(text: Text): Option[IArray[Text | List[Text] | Optional[Text]]] =
     val matcher = javaPattern.matcher(text.s).nn
 
-    def recur(todo: List[Regex.Group], matches: List[Text | Option[Text] | List[Text]], index: Int)
-            : List[Text | Option[Text] | List[Text]] =
+    def recur(todo: List[Regex.Group], matches: List[Text | Optional[Text] | List[Text]], index: Int)
+            : List[Text | Optional[Text] | List[Text]] =
 
       todo match
         case Nil =>
@@ -267,7 +267,7 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
                 do submatches ::= submatcher.toMatchResult.nn.group(0).nn.tt
 
                 if group.quantifier == Regex.Quantifier.Between(0, 1)
-                then submatches.headOption :: matches
+                then submatches.prim :: matches
                 else submatches.reverse :: matches
 
             else matches
