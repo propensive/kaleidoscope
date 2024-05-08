@@ -16,16 +16,16 @@
 
 package kaleidoscope
 
-import anticipation.*
-import vacuous.*
-import rudiments.*
-import contingency.*
-import fulminate.*
+import language.experimental.captureChecking
 
 import java.util.regex.*
 import java.util.concurrent.ConcurrentHashMap
 
-import language.experimental.captureChecking
+import anticipation.*
+import contingency.*
+import fulminate.*
+import rudiments.*
+import vacuous.*
 
 object RegexError:
   enum Reason:
@@ -202,7 +202,6 @@ object Regex:
           index += 1
           group(start, children, top)
 
-
     val mainGroup = group(0, Nil, true)
 
     def check(groups: List[Group], canCapture: Boolean): Unit =
@@ -242,11 +241,11 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
   def matches(text: Text): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text): Option[IArray[Text | List[Text] | Optional[Text]]] =
+  def matchGroups(text: Text): Option[IArray[List[Text] | Optional[Text]]] =
     val matcher = javaPattern.matcher(text.s).nn
 
-    def recur(todo: List[Regex.Group], matches: List[Text | Optional[Text] | List[Text]], index: Int)
-            : List[Text | Optional[Text] | List[Text]] =
+    def recur(todo: List[Regex.Group], matches: List[Optional[Text] | List[Text]], index: Int)
+            : List[Optional[Text] | List[Text]] =
 
       todo match
         case Nil =>

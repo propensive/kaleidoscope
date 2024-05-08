@@ -16,9 +16,9 @@
 
 package kaleidoscope
 
-import anticipation.*
-
 import language.experimental.captureChecking
+
+import anticipation.*
 
 enum GlobToken:
   case Star, Globstar, OneChar
@@ -31,10 +31,10 @@ enum GlobToken:
     case Star        => "[^/\\\\]*"
     case OneChar     => "[^/\\\\]"
     case Globstar    => ".*"
-    
+
     case Range(start, end, inverse) =>
       s"[${if inverse then "^" else ""}${Exact(start).regex}-${Exact(end).regex}]"
-    
+
     case Specific(chars, inverse) =>
       chars.flatMap(Exact(_).regex).mkString(s"[${if inverse then "^" else ""}", "", "]")
 
@@ -53,24 +53,22 @@ object Glob:
       val text2 = if inverse then text.drop(1) else text
       if text2.length == 3 && text2(1) == '-' then GlobToken.Range(text2(0), text2(2), inverse)
       else GlobToken.Specific(text2, inverse)
-        
+
 
     def recur(index: Int, tokens: List[GlobToken]): Glob =
       if index >= text.s.length then Glob(tokens.reverse*) else text.s(index) match
         case '*' => tokens match
           case Star :: tail => recur(index + 1, Globstar :: tail)
           case _            => recur(index + 1, Star :: tokens)
-        
+
         case '?' =>
           recur(index + 1, OneChar :: tokens)
-        
+
         case '[' =>
           val end = text.s.indexOf(']', index + 1)
           recur(end + 1, range(text.s.substring(index + 1, end).nn) :: tokens)
-        
+
         case char =>
           recur(index + 1, Exact(char) :: tokens)
-      
+
     recur(0, Nil)
-
-

@@ -16,16 +16,16 @@
 
 package kaleidoscope
 
-import anticipation.*
-import vacuous.*
-import fulminate.*
-import contingency.*
-
-import scala.quoted.*
+import language.experimental.captureChecking
 
 import java.util.regex.*
 
-import language.experimental.captureChecking
+import scala.quoted.*
+
+import anticipation.*
+import contingency.*
+import fulminate.*
+import vacuous.*
 
 extension (inline ctx: StringContext)
   transparent inline def r: Any = ${Kaleidoscope.regex('ctx)}
@@ -73,8 +73,7 @@ object Kaleidoscope:
     def unapply(scrutinee: Text): ResultType =
       val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
 
-      // FIXME: [#39] Stop using `Array` when capture checking is working again
-      val result2 = result.asInstanceOf[Option[Array[Text | List[Text] | Optional[Text]]]]
+      val result2 = result.asInstanceOf[Option[IArray[List[Text] | Optional[Text]]]]
 
       if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
-      else result2.map(Tuple.fromArray(_)).asInstanceOf[ResultType]
+      else result2.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]

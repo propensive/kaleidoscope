@@ -317,7 +317,7 @@ object Tests extends Suite(t"Kaleidoscope tests"):
           case g"/$home/**" => home
       .assert(_ == t"home")
 
-    suite(t"Compiler tests"):
+    suite(t"Compilation tests"):
       test(t"brackets must be matched"):
         demilitarize:
           t"" match
