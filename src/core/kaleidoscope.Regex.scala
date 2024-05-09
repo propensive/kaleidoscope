@@ -23,43 +23,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 import anticipation.*
 import contingency.*
-import fulminate.*
 import rudiments.*
 import vacuous.*
-
-object RegexError:
-  enum Reason:
-    case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
-        IncompleteRepetition, InvalidPattern
-
-  object Reason:
-    given [ReasonType <: Reason] => ReasonType is Communicable =
-      case UnclosedGroup =>
-        msg"a capturing group was not closed"
-
-      case ExpectedGroup =>
-        msg"a capturing group was expected immediately following an extractor"
-
-      case BadRepetition =>
-        msg"the maximum number of repetitions is less than the minimum"
-
-      case Uncapturable =>
-        msg"a capturing group inside a repeating group can not be extracted"
-
-      case UnexpectedChar =>
-        msg"the repetition range contained an unexpected character"
-
-      case NotInGroup =>
-        msg"a closing parenthesis was found without a corresponding opening parenthesis"
-
-      case IncompleteRepetition =>
-        msg"the repetition range was not closed"
-
-      case InvalidPattern =>
-        msg"the pattern was invalid"
-
-case class RegexError(reason: RegexError.Reason)
-extends Error(msg"the regular expression could not be parsed because $reason")
 
 import RegexError.Reason.*
 
@@ -186,7 +151,7 @@ object Regex:
         case '\u0000' =>
           if !top then abort(RegexError(UnclosedGroup))
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
-              Quantifier.Exactly(1), Greed.Greedy, captured.contains(start - 1))
+              Quantifier.Exactly(1), Greed.Greedy, captured.has(start - 1))
         case '(' =>
           index += 1
           group(start, group(index, Nil, false) :: children, top)
@@ -195,9 +160,11 @@ object Regex:
           if top then abort(RegexError(NotInGroup))
           val end = index
           index += 1
-          val quant = quantifier()
+          val quantifier2 = quantifier()
           val greed2 = greed()
-          Group(start, end, index, children.reverse, quant, greed2, captured.contains(start - 1))
+
+          Group(start, end, index, children.reverse, quantifier2, greed2, captured.has(start - 1))
+
         case _ =>
           index += 1
           group(start, children, top)

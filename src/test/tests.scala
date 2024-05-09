@@ -16,19 +16,18 @@
 
 package kaleidoscope
 
-import probably.*
-import vacuous.*
-import rudiments.*
-import spectacular.*
+import contingency.*
 import gossamer.*
 import larceny.*
-import contingency.*
+import probably.*
+import rudiments.*
+import spectacular.*
+import vacuous.*
 
 import errorHandlers.throwUnsafely
 
 object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
-
     suite(t"Regex tests"):
       import Regex.Group, Regex.Quantifier.*, Regex.Greed.*
 
