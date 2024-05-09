@@ -30,6 +30,7 @@ import RegexError.Reason.*
 
 object Regex:
   private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
+
   enum Greed:
     case Greedy, Reluctant, Possessive
 
@@ -172,7 +173,7 @@ object Regex:
     val mainGroup = group(0, Nil, true)
 
     def check(groups: List[Group], canCapture: Boolean): Unit =
-      groups.foreach: group =>
+      groups.each: group =>
         if !canCapture && group.capture then abort(RegexError(Uncapturable))
         check(group.groups, canCapture && group.quantifier.unitary)
 
@@ -180,9 +181,9 @@ object Regex:
 
     Regex(text, mainGroup.groups)
 
-  def makePattern
-      (pattern: Text, todo: List[Regex.Group], last: Int, text: Text, end: Int, index: Int)
+  def makePattern(pattern: Text, todo: List[Group], last: Int, text: Text, end: Int, index: Int)
           : (Int, Text) =
+
     todo match
       case Nil =>
         (index, (text.s+pattern.s.substring(last, end).nn).tt)
@@ -229,8 +230,7 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
                 val submatcher = compiled.matcher(matchedText).nn
                 var submatches: List[Text] = Nil
 
-                while submatcher.find()
-                do submatches ::= submatcher.toMatchResult.nn.group(0).nn.tt
+                while submatcher.find() do submatches ::= submatcher.toMatchResult.nn.group(0).nn.tt
 
                 if group.quantifier == Regex.Quantifier.Between(0, 1)
                 then submatches.prim :: matches
