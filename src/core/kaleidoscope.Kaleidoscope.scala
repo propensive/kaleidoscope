@@ -16,7 +16,7 @@
 
 package kaleidoscope
 
-import language.experimental.captureChecking
+import language.experimental.pureFunctions
 
 import java.util.regex.*
 

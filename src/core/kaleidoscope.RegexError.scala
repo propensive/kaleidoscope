@@ -28,7 +28,7 @@ object RegexError:
         IncompleteRepetition, InvalidPattern
 
   object Reason:
-    given [ReasonType <: Reason] => ReasonType is Communicable =
+    given [ReasonType <: Reason]: (Communicable { type Self = ReasonType }) =
       case UnclosedGroup =>
         msg"a capturing group was not closed"
 
