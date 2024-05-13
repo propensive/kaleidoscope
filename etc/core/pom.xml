@@ -3,9 +3,9 @@
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.github.propensive</groupId>
+  <groupId>dev.soundness</groupId>
   <artifactId>kaleidoscope-core</artifactId>
-  <version>0.5.0</version>
+  <version>0.1.0</version>
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -23,9 +23,9 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>io.github.propensive</groupId>
+      <groupId>dev.soundness</groupId>
       <artifactId>contingency-core</artifactId>
-      <version>0.4.0</version>
+      <version>0.1.0</version>
     </dependency>
   </dependencies>
   <organization>
