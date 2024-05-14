@@ -9,12 +9,13 @@ or to use it with other [Soundness](https://github.com/propensive/soundness/) li
 import soundness.*
 ```
 
-> Note that Kaleidoscope uses the `Text` type from
-> [Anticipation](https://github.com/propensive/anticipation) and the `Optional`
-> type from [Vacuous](https://github.com/propensive/vacuous/). These offer some
-> advantages, but they can be easily converted: `Text#s` converts a `Text` to a
-> `String` and `Optional#option` converts an `Optional` value to its equivalent
-> `Option`. The necessary imports are show in the examples.
+Note that Kaleidoscope uses the `Text` type from
+[Anticipation](https://github.com/propensive/anticipation) and the `Optional`
+type from [Vacuous](https://github.com/propensive/vacuous/). These offer some
+advantages over `String` and `Option`, and they can be easily converted:
+`Text#s` converts a `Text` to a `String` and `Optional#option` converts an
+`Optional` value to its equivalent `Option`. The necessary imports are shown in
+the examples.
 
 You can then use a Kaleidoscope regular expression—a string prefixed with
 the letter `r`—anywhere you can pattern match against a string in Scala. For example,
