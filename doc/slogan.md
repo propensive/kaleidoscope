@@ -1,1 +1,1 @@
-Statically-checked inline matching on regular expressions
+Statically-checked inline pattern matching on regular expressions
