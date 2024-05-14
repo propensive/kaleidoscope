@@ -1,10 +1,10 @@
 [<img alt="GitHub Workflow" src="https://img.shields.io/github/actions/workflow/status/propensive/kaleidoscope/main.yml?style=for-the-badge" height="24">](https://github.com/propensive/kaleidoscope/actions)
-[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/7b6mpF6Qcf)
+[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/MBUrkTgMnA)
 <img src="/doc/images/github.png" valign="middle">
 
 # Kaleidoscope
 
-__Statically-checked inline matching on regular expressions__
+__Statically-checked inline pattern matching on regular expressions__
 
 Kaleidoscope is a small library to make pattern matching against strings more
 pleasant. Regular expressions can be written directly in patterns, and
@@ -30,17 +30,16 @@ structured objects. Kaleidoscope makes it easier to move away from strings.
 - simpler "glob" syntax is also provided
 
 
-## Availability Plan
+## Availability
 
-Kaleidoscope has not yet been published. The medium-term plan is to build Kaleidoscope
-with [Fury](https://github.com/propensive/fury) and to publish it as a source build on
-[Vent](https://github.com/propensive/vent). This will enable ordinary users to write and build
-software which depends on Kaleidoscope.
+Kaleidoscope is available as a binary for Scala 3.4.0 and later, from [Maven
+Central](https://central.sonatype.com). To include it in an `sbt` build, use
+the coordinates:
+```scala
+libraryDependencies += "dev.soundness" % "kaleidoscope-core" % "0.1.0"
+```
 
-Subsequently, Kaleidoscope will also be made available as a binary in the Maven
-Central repository. This will enable users of other build tools to use it.
 
-For the overeager, curious and impatient, see [building](#building).
 
 ## Getting Started
 
