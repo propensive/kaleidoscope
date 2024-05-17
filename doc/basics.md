@@ -1,4 +1,5 @@
-Kaleidoscope is included in the `kaleidoscope` package, and exported to the `soundness` package.
+Kaleidoscope is included in the `kaleidoscope` package, and exported to the
+`soundness` package.
 
 To use Kaleidoscope alone, you can include the import,
 ```scala
