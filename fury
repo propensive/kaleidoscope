@@ -4,7 +4,7 @@
 repo propensive/probably
 repo propensive/larceny
 
-target kaleidoscope/test
+target kaleidoscope/core
 
 project kaleidoscope
   module core
