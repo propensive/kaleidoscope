@@ -1,10 +1,10 @@
 [<img alt="GitHub Workflow" src="https://img.shields.io/github/actions/workflow/status/propensive/kaleidoscope/main.yml?style=for-the-badge" height="24">](https://github.com/propensive/kaleidoscope/actions)
-[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.gg/MBUrkTgMnA)
+[<img src="https://img.shields.io/discord/633198088311537684?color=8899f7&label=DISCORD&style=for-the-badge" height="24">](https://discord.com/invite/MBUrkTgMnA)
 <img src="/doc/images/github.png" valign="middle">
 
 # Kaleidoscope
 
-__Statically-checked inline pattern matching on regular expressions__
+__Statically-typed inline pattern matching on regular expressions__
 
 Kaleidoscope is a small library to make pattern matching against strings more
 pleasant. Regular expressions can be written directly in patterns, and
@@ -43,7 +43,8 @@ libraryDependencies += "dev.soundness" % "kaleidoscope-core" % "0.1.0"
 
 ## Getting Started
 
-Kaleidoscope is included in the `kaleidoscope` package, and exported to the `soundness` package.
+Kaleidoscope is included in the `kaleidoscope` package, and exported to the
+`soundness` package.
 
 To use Kaleidoscope alone, you can include the import,
 ```scala
