@@ -30,28 +30,28 @@ object RegexError:
   object Reason:
     given Reason is Communicable =
       case UnclosedGroup =>
-        msg"a capturing group was not closed"
+        m"a capturing group was not closed"
 
       case ExpectedGroup =>
-        msg"a capturing group was expected immediately following an extractor"
+        m"a capturing group was expected immediately following an extractor"
 
       case BadRepetition =>
-        msg"the maximum number of repetitions is less than the minimum"
+        m"the maximum number of repetitions is less than the minimum"
 
       case Uncapturable =>
-        msg"a capturing group inside a repeating group can not be extracted"
+        m"a capturing group inside a repeating group can not be extracted"
 
       case UnexpectedChar =>
-        msg"the repetition range contained an unexpected character"
+        m"the repetition range contained an unexpected character"
 
       case NotInGroup =>
-        msg"a closing parenthesis was found without a corresponding opening parenthesis"
+        m"a closing parenthesis was found without a corresponding opening parenthesis"
 
       case IncompleteRepetition =>
-        msg"the repetition range was not closed"
+        m"the repetition range was not closed"
 
       case InvalidPattern =>
-        msg"the pattern was invalid"
+        m"the pattern was invalid"
 
 case class RegexError(reason: RegexError.Reason)
-extends Error(msg"the regular expression could not be parsed because $reason")
+extends Error(m"the regular expression could not be parsed because $reason")
