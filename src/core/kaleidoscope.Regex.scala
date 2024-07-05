@@ -76,7 +76,7 @@ object Regex:
       else (index2, s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})".tt)
 
   def make(parts: Seq[String])(using Unsafe): Regex =
-    import errorHandlers.throwUnsafely
+    import strategies.throwUnsafely
     parse(parts.to(List).map(_.tt))
 
   def apply(text: Text): Regex raises RegexError = parse(List(text))

@@ -24,7 +24,7 @@ import rudiments.*
 import spectacular.*
 import vacuous.*
 
-import errorHandlers.throwUnsafely
+import strategies.throwUnsafely
 
 object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
