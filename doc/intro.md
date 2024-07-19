@@ -1,4 +1,4 @@
-Kaleidoscope is a small library to make pattern matching against strings more
+__Kaleidoscope__ is a small library to make pattern matching against strings more
 pleasant. Regular expressions can be written directly in patterns, and
 capturing groups bound directly to variables, typed according to the group's
 repetition. Here is an example:
