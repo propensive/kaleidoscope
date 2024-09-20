@@ -53,5 +53,5 @@ object RegexError:
       case InvalidPattern =>
         m"the pattern was invalid"
 
-case class RegexError(reason: RegexError.Reason)
+case class RegexError(reason: RegexError.Reason)(using Diagnostics)
 extends Error(m"the regular expression could not be parsed because $reason")
