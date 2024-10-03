@@ -54,7 +54,7 @@ object Kaleidoscope:
       else AppliedType(defn.TupleClass(types.length).info.typeSymbol.typeRef, types)
 
     try Pattern.compile(parts.mkString) catch case exception: PatternSyntaxException =>
-      import exceptionDiagnostics.empty
+      import errorDiagnostics.empty
       abandon(RegexError(RegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
