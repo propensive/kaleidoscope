@@ -56,13 +56,13 @@ object Regex:
     def unitary: Boolean = this == Exactly(1)
 
   case class Group
-      (start:      Int,
-       end:        Int,
-       outerEnd:   Int,
-       groups:     List[Group] = Nil,
-       quantifier: Quantifier  = Quantifier.Exactly(1),
-       greed:      Greed       = Greed.Greedy,
-       capture:    Boolean     = false):
+     (start:      Int,
+      end:        Int,
+      outerEnd:   Int,
+      groups:     List[Group] = Nil,
+      quantifier: Quantifier  = Quantifier.Exactly(1),
+      greed:      Greed       = Greed.Greedy,
+      capture:    Boolean     = false):
 
     def outerStart: Int = (start - 1).max(0)
     def allGroups: List[Regex.Group] = groups.flatMap { group => group :: group.allGroups }
