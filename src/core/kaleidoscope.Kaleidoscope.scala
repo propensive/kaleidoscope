@@ -41,7 +41,7 @@ object Kaleidoscope:
   private def extractor(parts: List[String])(using Quotes): Expr[Any] =
     import quotes.reflect.*
 
-    val regex = abandonment(Regex.parse(parts.map(Text(_))))
+    val regex = haltingly(Regex.parse(parts.map(Text(_))))
 
     val types: List[TypeRepr] = regex.captureGroups.map(_.quantifier).map:
       case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
