@@ -55,7 +55,7 @@ object Kaleidoscope:
 
     try Pattern.compile(parts.mkString) catch case exception: PatternSyntaxException =>
       import errorDiagnostics.empty
-      abandon(RegexError(RegexError.Reason.InvalidPattern).message)
+      halt(RegexError(RegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
     else (tupleType.asType: @unchecked) match
