@@ -42,6 +42,7 @@ libraryDependencies += "dev.soundness" % "kaleidoscope-core" % "0.1.0"
 
 
 
+
 ## Getting Started
 
 Kaleidoscope is included in the `kaleidoscope` package, and exported to the
@@ -269,6 +270,6 @@ The logo is a loose allusion to a hexagonal pattern, which could appear in a kal
 
 ## License
 
-Kaleidoscope is copyright &copy; 2024 Jon Pretty & Propensive O&Uuml;, and
+Kaleidoscope is copyright &copy; 2025 Jon Pretty & Propensive O&Uuml;, and
 is made available under the [Apache 2.0 License](/license.md).
 
