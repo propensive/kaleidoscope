@@ -18,7 +18,7 @@ package kaleidoscope
 
 import language.experimental.pureFunctions
 
-import java.util.regex.*
+import java.util.regex as jur
 import java.util.concurrent.ConcurrentHashMap
 
 import anticipation.*
@@ -29,7 +29,7 @@ import vacuous.*
 import RegexError.Reason.*
 
 object Regex:
-  private val cache: ConcurrentHashMap[String, Pattern] = ConcurrentHashMap()
+  private val cache: ConcurrentHashMap[String, jur.Pattern] = ConcurrentHashMap()
 
   enum Greed:
     case Greedy, Reluctant, Possessive
@@ -204,13 +204,27 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
   def allGroups: List[Regex.Group] = groups.flatMap { group => group :: group.allGroups }
   def captureGroups: List[Regex.Group] = allGroups.filter(_.capture)
 
-  private[kaleidoscope] lazy val javaPattern: Pattern =
-    Regex.cache.computeIfAbsent(capturePattern.s, Pattern.compile(_)).nn
+  private[kaleidoscope] lazy val javaPattern: jur.Pattern =
+    Regex.cache.computeIfAbsent(capturePattern.s, jur.Pattern.compile(_)).nn
+
+  def seek(input: Text, start: Int): Optional[Text] =
+    val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
+    if matcher.find(start) then matcher.group().nn.tt else Unset
+
+  def search(input: Text, start: Int = 0, overlap: Boolean = false): LazyList[Text] =
+    val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
+
+    def recur(offset: Int): LazyList[Text] =
+      if matcher.find(start)
+      then matcher.group().nn.tt #:: recur((if overlap then matcher.start else matcher.end) + 1)
+      else LazyList()
+
+    recur(0)
 
   def matches(text: Text): Boolean = !matchGroups(text).isEmpty
 
   def matchGroups(text: Text): Option[IArray[List[Text] | Optional[Text]]] =
-    val matcher = javaPattern.matcher(text.s).nn
+    val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
     def recur(todo: List[Regex.Group], matches: List[Optional[Text] | List[Text]], index: Int)
             : List[Optional[Text] | List[Text]] =
@@ -226,7 +240,7 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
               else
                 val matchedText = matcher.group(s"g$index").nn
                 val subpattern = pattern.s.substring(group.start, group.end).nn
-                val compiled = Regex.cache.computeIfAbsent(subpattern, Pattern.compile(_)).nn
+                val compiled = Regex.cache.computeIfAbsent(subpattern, jur.Pattern.compile(_)).nn
                 val submatcher = compiled.matcher(matchedText).nn
                 var submatches: List[Text] = Nil
 
