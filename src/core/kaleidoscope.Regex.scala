@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import anticipation.*
 import contingency.*
+import denominative.*
 import rudiments.*
 import vacuous.*
 
@@ -207,19 +208,21 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
   private[kaleidoscope] lazy val javaPattern: jur.Pattern =
     Regex.cache.computeIfAbsent(capturePattern.s, jur.Pattern.compile(_)).nn
 
-  def seek(input: Text, start: Int): Optional[Text] =
+  def seek(input: Text, start: Ordinal = Prim): Optional[Interval] =
     val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
-    if matcher.find(start) then matcher.group().nn.tt else Unset
+    if matcher.find(start.n0) then Interval.zerary(matcher.start, matcher.end) else Unset
 
-  def search(input: Text, start: Int = 0, overlap: Boolean = false): LazyList[Text] =
+  def search(input: Text, start: Ordinal = Prim, overlap: Boolean = false): LazyList[Interval] =
     val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
 
-    def recur(offset: Int): LazyList[Text] =
-      if matcher.find(start)
-      then matcher.group().nn.tt #:: recur((if overlap then matcher.start else matcher.end) + 1)
+    def recur(offset: Int): LazyList[Interval] =
+      if matcher.find(offset)
+      then
+        Interval.zerary(matcher.start, matcher.end)
+        #:: recur((if overlap then matcher.start else matcher.end) + 1)
       else LazyList()
 
-    recur(0)
+    recur(start.n0)
 
   def matches(text: Text): Boolean = !matchGroups(text).isEmpty
 
