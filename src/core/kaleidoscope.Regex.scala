@@ -85,7 +85,7 @@ object Regex:
   def parse(parts: List[Text]): Regex raises RegexError =
     (parts: @unchecked) match
       case head :: tail =>
-        if !tail.all(_.s.startsWith("(")) then abort(RegexError(ExpectedGroup))
+        if !tail.all(_.s.startsWith("(")) then abort(RegexError(0, ExpectedGroup))
 
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
@@ -126,12 +126,13 @@ object Regex:
                 Quantifier.AtLeast(n)
 
               case m =>
-                if m < n then abort(RegexError(BadRepetition)) else Quantifier.Between(n, m)
+                if m < n then abort(RegexError(index, BadRepetition))
+                else Quantifier.Between(n, m)
 
           case _ =>
-            abort(RegexError(UnexpectedChar))
+            abort(RegexError(index, UnexpectedChar))
 
-        if current() != '}' then abort(RegexError(UnexpectedChar)) else quantifier.adv()
+        if current() != '}' then abort(RegexError(index, UnexpectedChar)) else quantifier.adv()
 
       case _ =>
         Quantifier.Exactly(1)
@@ -139,43 +140,51 @@ object Regex:
     @tailrec
     def number(required: Boolean, num: Int = 0, first: Boolean = true): Int = current() match
       case '\u0000' =>
-        abort(RegexError(IncompleteRepetition))
+        abort(RegexError(index, IncompleteRepetition))
 
       case ch if ch.isDigit =>
         index += 1
         number(required, num*10 + (ch - '0').toInt, false)
 
       case other =>
-        if first && required then abort(RegexError(UnexpectedChar)) else num
+        if first && required then abort(RegexError(index, UnexpectedChar)) else num
 
-    def group(start: Int, children: List[Group], top: Boolean): Group =
+    def group(start: Int, children: List[Group], top: Boolean, escape: Boolean): Group =
       current() match
+        case '\\' =>
+          index += 1
+          group(start, children, top, !escape)
+
         case '\u0000' =>
-          if !top then abort(RegexError(UnclosedGroup))
+          if !top then abort(RegexError(index, UnclosedGroup))
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
               Quantifier.Exactly(1), Greed.Greedy, captured.has(start - 1))
+
         case '(' =>
           index += 1
-          group(start, group(index, Nil, false) :: children, top)
+          if escape then group(start, children, top, false)
+          else group(start, group(index, Nil, false, false) :: children, top, false)
 
         case ')' =>
-          if top then abort(RegexError(NotInGroup))
-          val end = index
           index += 1
-          val quantifier2 = quantifier()
-          val greed2 = greed()
+          if escape then group(start, children, top, false)
+          else
+            if top then abort(RegexError(index - 1, NotInGroup))
+            val end = index - 1
+            val quantifier2 = quantifier()
+            val greed2 = greed()
 
-          Group(start, end, index, children.reverse, quantifier2, greed2, captured.has(start - 1))
+            Group(start, end, index, children.reverse, quantifier2, greed2, captured.has(start - 1))
 
         case _ =>
           index += 1
-          group(start, children, top)
+          group(start, children, top, false)
 
-    val mainGroup = group(0, Nil, true)
+    val mainGroup = group(0, Nil, true, false)
 
     def check(groups: List[Group], canCapture: Boolean): Unit =
       groups.each: group =>
-        if !canCapture && group.capture then abort(RegexError(Uncapturable))
+        if !canCapture && group.capture then abort(RegexError(group.start, Uncapturable))
         check(group.groups, canCapture && group.quantifier.unitary)
 
     check(mainGroup.groups, true)

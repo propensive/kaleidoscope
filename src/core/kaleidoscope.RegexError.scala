@@ -25,7 +25,7 @@ import RegexError.Reason.*
 object RegexError:
   enum Reason:
     case UnclosedGroup, ExpectedGroup, BadRepetition, Uncapturable, UnexpectedChar, NotInGroup,
-        IncompleteRepetition, InvalidPattern
+        IncompleteRepetition, InvalidPattern, UnclosedEscape
 
   object Reason:
     given Reason is Communicable =
@@ -53,5 +53,8 @@ object RegexError:
       case InvalidPattern =>
         m"the pattern was invalid"
 
-case class RegexError(reason: RegexError.Reason)(using Diagnostics)
-extends Error(m"the regular expression could not be parsed because $reason")
+      case UnclosedEscape =>
+        m"nothing followed the escape character `\`"
+
+case class RegexError(index: Int, reason: RegexError.Reason)(using Diagnostics)
+extends Error(m"the regular expression could not be parsed because $reason at index")

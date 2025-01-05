@@ -17,6 +17,7 @@
 package kaleidoscope
 
 import contingency.*
+import fulminate.*
 import gossamer.*
 import larceny.*
 import probably.*
@@ -25,6 +26,7 @@ import spectacular.*
 import vacuous.*
 
 import strategies.throwUnsafely
+import errorDiagnostics.stackTraces
 
 object Tests extends Suite(t"Kaleidoscope tests"):
   def run(): Unit =
