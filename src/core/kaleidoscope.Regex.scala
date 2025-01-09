@@ -239,6 +239,7 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
     val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
     if matcher.find(start.n0) then Interval.zerary(matcher.start, matcher.end) else Unset
 
+
   def search(input: Text, start: Ordinal = Prim, overlap: Boolean = false): LazyList[Interval] =
     val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
 
@@ -251,9 +252,10 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
     recur(start.n0)
 
-  def matches(text: Text): Boolean = !matchGroups(text).isEmpty
+  def matches(text: Text)(using Matching): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text): Option[IArray[List[Text] | Optional[Text]]] =
+  def matchGroups(text: Text)(using matching: Matching): Option[IArray[List[Text] | Optional[Text]]] =
+
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
     def recur(todo: List[Regex.Group], matches: List[Optional[Text] | List[Text]], index: Int)
@@ -284,4 +286,20 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
           recur(tail, matches2, index + 1)
 
-    if matcher.matches then Some(IArray.from(recur(captureGroups, Nil, 0).reverse)) else None
+    matching.nextStart match
+      case Unset =>
+        if !matcher.matches then None else Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
+
+      case index: Int =>
+        if !matcher.find(index) then None else
+          matching.nextStart = matcher.start + 1
+          Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
+
+def extract[ValueType](input: Text, start: Ordinal = Prim)
+   (lambda: Matching ?=> PartialFunction[Text, ValueType]): LazyList[ValueType] =
+  if start.n0 < input.s.length then
+    val matching = Matching(start.n0)
+    lambda(using matching).lift(input) match
+      case Some(head) => head #:: extract(input, Ordinal.zerary(matching.nextStart.or(0)))(lambda)
+      case _          => LazyList()
+  else LazyList()
