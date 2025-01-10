@@ -24,11 +24,23 @@ import scala.quoted.*
 
 import anticipation.*
 import contingency.*
+import denominative.*
 import fulminate.*
 import vacuous.*
 
 object Kaleidoscope:
   given Realm = realm"kaleidoscope"
+
+  def extract[TextType, ValueType](input: Text, start: Ordinal = Prim)
+     (lambda: Matching ?=> TextType ~> ValueType)
+          : LazyList[ValueType] =
+    if start.n0 < input.s.length then
+      val matching = Matching(start.n0)
+      lambda(using matching).lift(input) match
+        case Some(head) => head #:: extract(input, Ordinal.zerary(matching.nextStart.or(0)))(lambda)
+        case _          => LazyList()
+
+    else LazyList()
 
   def glob(context: Expr[StringContext])(using Quotes): Expr[Any] =
     val parts = context.value.get.parts.map(Text(_)).map(Glob.parse(_).regex.s).to(List)

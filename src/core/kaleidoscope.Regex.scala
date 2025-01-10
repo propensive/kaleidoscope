@@ -254,7 +254,8 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
   def matches(text: Text)(using Matching): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text)(using matching: Matching): Option[IArray[List[Text] | Optional[Text]]] =
+  def matchGroups(text: Text)(using matching: Matching)
+          : Option[IArray[List[Interval] | Optional[Interval]]] =
 
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
@@ -294,12 +295,3 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
         if !matcher.find(index) then None else
           matching.nextStart = matcher.start + 1
           Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
-
-def extract[ValueType](input: Text, start: Ordinal = Prim)
-   (lambda: Matching ?=> PartialFunction[Text, ValueType]): LazyList[ValueType] =
-  if start.n0 < input.s.length then
-    val matching = Matching(start.n0)
-    lambda(using matching).lift(input) match
-      case Some(head) => head #:: extract(input, Ordinal.zerary(matching.nextStart.or(0)))(lambda)
-      case _          => LazyList()
-  else LazyList()
