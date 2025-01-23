@@ -251,49 +251,49 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
     suite(t"Match tests"):
       test(t"simple match"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"hello world" => 1
 
       . assert(_ == 1)
 
       test(t"basic extractor"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"(hello world)" => 2
 
       . assert(_ == 2)
 
       test(t"extract one word"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"$first(hello) world" => first.show
 
       . check(_ == t"hello")
 
       test(t"extract a nested capture group"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"(($first(hello)) world)" => first.show
 
       . assert(_ == t"hello")
 
       test(t"extract words"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"$first(hello) $second(world)" => List(first, second)
 
       . assert(_ == List(t"hello", t"world"))
 
       test(t"skipped capture group"):
-        t"hello world".runtimeChecked match
+        t"hello world".absolve match
           case r"(hello) $second(world)" => second.show
 
       . assert(_ == t"world")
 
       test(t"skipped capture group 2"):
-        t"1 2 3 4 5".runtimeChecked match
+        t"1 2 3 4 5".absolve match
           case r"1 $two(2) 3 4 5" => two.show
 
       . assert(_ == t"2")
 
       test(t"nested unbound capture group"):
-        t"anyval".runtimeChecked match
+        t"anyval".absolve match
           case r"$x(any(val))" => x.show
       . assert(_ == t"anyval")
 
