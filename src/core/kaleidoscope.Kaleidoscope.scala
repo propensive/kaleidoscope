@@ -58,7 +58,7 @@ object Kaleidoscope:
       halt(RegexError(exception.getIndex, RegexError.Reason.InvalidPattern).message)
 
     if types.length == 0 then '{NoExtraction(${Expr(parts.head)})}
-    else (tupleType.asType: @unchecked) match
+    else tupleType.asType.runtimeChecked match
       case '[resultType] => '{RExtractor[Option[resultType]](${Expr(parts)})}
 
   class NoExtraction(pattern: String):

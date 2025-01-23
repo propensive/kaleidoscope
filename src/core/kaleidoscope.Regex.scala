@@ -83,7 +83,7 @@ object Regex:
   def apply(text: Text): Regex raises RegexError = parse(List(text))
 
   def parse(parts: List[Text]): Regex raises RegexError =
-    (parts: @unchecked) match
+    parts.runtimeChecked match
       case head :: tail =>
         if !tail.all(_.s.startsWith("(")) then abort(RegexError(0, ExpectedGroup))
 
