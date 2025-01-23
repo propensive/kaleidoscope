@@ -57,12 +57,12 @@ object Regex:
     def unitary: Boolean = this == Exactly(1)
 
   case class Group
-     (start:      Int,
-      end:        Int,
+     (start:     Int,
+      end:     Int,
       outerEnd:   Int,
-      groups:     List[Group] = Nil,
+      groups:    List[Group] = Nil,
       quantifier: Quantifier  = Quantifier.Exactly(1),
-      greed:      Greed       = Greed.Greedy,
+      greed:     Greed       = Greed.Greedy,
       capture:    Boolean     = false):
 
     def outerStart: Int = (start - 1).max(0)
@@ -151,7 +151,7 @@ object Regex:
 
     def group
        (start: Int, children: List[Group], top: Boolean, escape: Boolean, charClass: Optional[Int])
-            : Group =
+    :     Group =
 
       current() match
         case '\u0000' =>
@@ -210,7 +210,7 @@ object Regex:
     Regex(text, mainGroup.groups)
 
   def makePattern(pattern: Text, todo: List[Group], last: Int, text: Text, end: Int, index: Int)
-          : (Int, Text) =
+  :     (Int, Text) =
 
     todo match
       case Nil =>
@@ -259,7 +259,7 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
     def recur(todo: List[Regex.Group], matches: List[Optional[Text] | List[Text]], index: Int)
-            : List[Optional[Text] | List[Text]] =
+    :     List[Optional[Text] | List[Text]] =
 
       todo match
         case Nil =>
