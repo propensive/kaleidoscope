@@ -225,7 +225,8 @@ object Tests extends Suite(t"Kaleidoscope tests"):
         . assert(_ == Some(List(t"bar", t"baz")))
 
         test(t"Two captures, one repeating"):
-          Regex.parse(List(t"foo", t"(bar)", t"(baz)*")).matchGroups(t"foobarbazbaz").map(_.to(List))
+          Regex.parse(List(t"foo", t"(bar)", t"(baz)*")).matchGroups(t"foobarbazbaz")
+          . map(_.to(List))
 
         . assert(_ == Some(List(t"bar", List(t"baz", t"baz"))))
 
