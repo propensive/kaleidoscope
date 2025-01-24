@@ -240,15 +240,15 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
     if matcher.find(start.n0) then Interval.zerary(matcher.start, matcher.end) else Unset
 
 
-  def search(input: Text, start: Ordinal = Prim, overlap: Boolean = false): LazyList[Interval] =
+  def search(input: Text, start: Ordinal = Prim, overlap: Boolean = false): Stream[Interval] =
     val matcher: jur.Matcher = javaPattern.matcher(input.s).nn
 
-    def recur(offset: Int): LazyList[Interval] =
+    def recur(offset: Int): Stream[Interval] =
       if matcher.find(offset)
       then
         Interval.zerary(matcher.start, matcher.end)
         #:: recur((if overlap then matcher.start else matcher.end) + 1)
-      else LazyList()
+      else Stream()
 
     recur(start.n0)
 
@@ -296,10 +296,10 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
           Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
 
 def extract[ValueType](input: Text, start: Ordinal = Prim)
-   (lambda: Matching ?=> PartialFunction[Text, ValueType]): LazyList[ValueType] =
+   (lambda: Matching ?=> PartialFunction[Text, ValueType]): Stream[ValueType] =
   if start.n0 < input.s.length then
     val matching = Matching(start.n0)
     lambda(using matching).lift(input) match
       case Some(head) => head #:: extract(input, Ordinal.zerary(matching.nextStart.or(0)))(lambda)
-      case _          => LazyList()
-  else LazyList()
+      case _          => Stream()
+  else Stream()
