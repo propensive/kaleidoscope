@@ -254,7 +254,8 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
   def matches(text: Text)(using Matching): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text)(using matching: Matching): Option[IArray[List[Text] | Optional[Text]]] =
+  def matchGroups(text: Text)(using matching: Matching)
+  :     Option[IArray[List[Text] | Optional[Text]]] =
 
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
