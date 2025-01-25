@@ -121,7 +121,8 @@ object Regex:
 
           case ',' =>
             index += 1
-            number(false) match
+            if current() == '}' then Quantifier.AtLeast(n)
+            else number(false) match
               case 0 =>
                 abort(RegexError(index - 1, ZeroMaximum))
 
@@ -146,8 +147,14 @@ object Regex:
         index += 1
         number(required, num*10 + (ch - '0').toInt, false)
 
-      case other =>
+      case ',' =>
+        if !required then abort(RegexError(index, UnexpectedChar)) else num
+
+      case '}' =>
         if first && required then abort(RegexError(index, UnexpectedChar)) else num
+
+      case other =>
+        abort(RegexError(index, UnexpectedChar))
 
     def group
        (start: Int, children: List[Group], top: Boolean, escape: Boolean, charClass: Optional[Int])
