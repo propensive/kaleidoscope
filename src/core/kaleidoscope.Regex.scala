@@ -259,9 +259,9 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
     recur(start.n0)
 
-  def matches(text: Text)(using Matching): Boolean = !matchGroups(text).isEmpty
+  def matches(text: Text)(using Scanner): Boolean = !matchGroups(text).isEmpty
 
-  def matchGroups(text: Text)(using matching: Matching)
+  def matchGroups(text: Text)(using scanner: Scanner)
   :     Option[IArray[List[Text] | Optional[Text]]] =
 
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
@@ -294,20 +294,20 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
 
           recur(tail, matches2, index + 1)
 
-    matching.nextStart match
+    scanner.nextStart match
       case Unset =>
         if !matcher.matches then None else Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
 
       case index: Int =>
         if !matcher.find(index) then None else
-          matching.nextStart = matcher.start + 1
+          scanner.nextStart = matcher.start + 1
           Some(IArray.from(recur(captureGroups, Nil, 0).reverse))
 
 def extract[ValueType](input: Text, start: Ordinal = Prim)
-   (lambda: Matching ?=> PartialFunction[Text, ValueType]): Stream[ValueType] =
+   (lambda: Scanner ?=> PartialFunction[Text, ValueType]): Stream[ValueType] =
   if start.n0 < input.s.length then
-    val matching = Matching(start.n0)
-    lambda(using matching).lift(input) match
-      case Some(head) => head #:: extract(input, Ordinal.zerary(matching.nextStart.or(0)))(lambda)
+    val scanner = Scanner(start.n0)
+    lambda(using scanner).lift(input) match
+      case Some(head) => head #:: extract(input, Ordinal.zerary(scanner.nextStart.or(0)))(lambda)
       case _          => Stream()
   else Stream()

@@ -64,8 +64,8 @@ object Kaleidoscope:
   class NoExtraction(pattern: String):
     inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
 
-    def unapply(scrutinee: Text)(using matching: Matching): Boolean =
-      matching.nextStart match
+    def unapply(scrutinee: Text)(using scanner: Scanner): Boolean =
+      scanner.nextStart match
         case Unset =>
           Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
 
@@ -73,11 +73,11 @@ object Kaleidoscope:
           val regex = Regex.make(List(pattern))(using Unsafe)
           val matcher = regex.javaPattern.matcher(scrutinee.s).nn
           val found = matcher.find(index)
-          if found then matching.nextStart = matcher.start
+          if found then scanner.nextStart = matcher.start
           found
 
   class RExtractor[ResultType](parts: Seq[String]):
-    def unapply(scrutinee: Text)(using matching: Matching): ResultType =
+    def unapply(scrutinee: Text)(using scanner: Scanner): ResultType =
       val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
       val result2 = result.asInstanceOf[Option[IArray[List[Text] | Optional[Text]]]]
 

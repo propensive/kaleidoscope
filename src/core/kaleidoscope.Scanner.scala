@@ -18,6 +18,6 @@ package kaleidoscope
 
 import vacuous.*
 
-object Matching:
-  given default: DummyImplicit => Matching = Matching(Unset)
-class Matching(var nextStart: Optional[Int] = Unset)
+object Scanner:
+  given default: DummyImplicit => Scanner = Scanner(Unset)
+class Scanner(var nextStart: Optional[Int] = Unset)

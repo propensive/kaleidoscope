@@ -214,7 +214,7 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
         . assert(_ == t"a(?<g0>(bc){3})")
 
-      suite(t"Matching patterns"):
+      suite(t"Scanner patterns"):
         test(t"Simple capture"):
           Regex.parse(List(t"foo", t"(bar)")).matchGroups(t"foobar")
           . map(_.to(List))
