@@ -64,22 +64,10 @@ object Kaleidoscope:
   class NoExtraction(pattern: String):
     inline def apply(): Regex = Regex.make(List(pattern))(using Unsafe)
 
-    def unapply(scrutinee: Text)(using matching: Matching): Boolean =
-      matching.nextStart match
-        case Unset =>
-          Regex.make(List(pattern))(using Unsafe).matches(scrutinee)
-
-        case index: Int =>
-          val regex = Regex.make(List(pattern))(using Unsafe)
-          val matcher = regex.javaPattern.matcher(scrutinee.s).nn
-          val found = matcher.find(index)
-          if found then matching.nextStart = matcher.start
-          found
+    def unapply(scrutinee: Text)(using scanner: Scanner): Boolean =
+      val regex = Regex.make(List(pattern))(using Unsafe)
+      scanner(regex, scrutinee)
 
   class RExtractor[ResultType](parts: Seq[String]):
-    def unapply(scrutinee: Text)(using matching: Matching): ResultType =
-      val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
-      val result2 = result.asInstanceOf[Option[IArray[List[Text] | Optional[Text]]]]
-
-      if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
-      else result2.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
+    def unapply(scrutinee: Text)(using scanner: Scanner): ResultType =
+      scanner.groups[ResultType](Regex.make(parts)(using Unsafe), scrutinee, parts.length)

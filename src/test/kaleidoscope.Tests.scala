@@ -384,6 +384,21 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
       . assert(_ == t"home")
 
+    suite(t"Extraction tests"):
+      test(t"Complex extraction"):
+        Regex.extract(t"the quick brown fox jumps over the lazy dog"):
+          case r"f$vowel([a-z])x" =>
+            vowel+vowel
+
+          case r"jumps" => t"xyz"
+
+          case r"$first([bcdfghjklmnpqrstvwxyz])[aeiou]$last([bcdfghjklmnpqrstvwxyz])" =>
+            t"$first$last"
+
+        . to(List)
+
+      . assert(_ == List(t"rw", t"oo", t"fx", t"xyz", t"jm", t"vr", t"lz", t"dg"))
+
     /*suite(t"Compilation tests"):
       test(t"brackets must be matched"):
         demilitarize:
