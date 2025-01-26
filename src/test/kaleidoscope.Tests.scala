@@ -427,7 +427,7 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
       . assert(_ == t"home")
 
-    /*suite(t"Compilation tests"):
+    suite(t"Compilation tests"):
       test(t"brackets must be matched"):
         demilitarize:
           t"" match
@@ -435,8 +435,9 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
         . head
         . message
+        . tap(println)
 
-      . assert(_.contains("kaleidoscope: the regular expression could not be parsed because a capturing group was not closed"))
+      . assert(_.contains("kaleidoscope:  the regular expression could not be parsed because a capturing group was not closed at 11"))
 
       test(t"variable must be bound"):
         demilitarize:
@@ -445,5 +446,6 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
         . head
         . message
+        . tap(println)
 
-      . assert(_.contains("kaleidoscope: the regular expression could not be parsed because a capturing group was expected immediately following an extractor"))*/
+      . assert(_.contains("kaleidoscope:  the regular expression could not be parsed because a capturing group was expected immediately following an extractor at 0"))
