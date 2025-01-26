@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
 import anticipation.*
 import contingency.*
 import denominative.*
+import proscenium.*
 import rudiments.*
 import vacuous.*
 
