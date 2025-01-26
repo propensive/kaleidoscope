@@ -16,15 +16,7 @@
 
 package kaleidoscope
 
-import anticipation.*
-import contingency.*
-import fulminate.*
-import gossamer.*
-//import larceny.*
-import probably.*
-import rudiments.*
-import spectacular.*
-import vacuous.*
+import soundness.*
 
 import strategies.throwUnsafely
 import errorDiagnostics.stackTraces
@@ -99,7 +91,14 @@ object Tests extends Suite(t"Kaleidoscope tests"):
 
         test(t"Parse aa(bb){14,16}ccddee"):
           Regex.parse(List(t"aa(bb){14,16}ccddee"))
+
         . assert(_ == Regex(t"aa(bb){14,16}ccddee", List(Group(3, 5, 13, Nil, Between(14, 16)))))
+
+        test(t"Capture character class"):
+          Regex.parse(List(t"w[aeiou]rld")).tap: result =>
+            println(result)
+
+        .assert(_ == Regex(t"w[aeiou]rld", List(Group(2, 7, 8, Nil, Exactly(1), Greedy, false, true))))
 
       suite(t"Parsing failures"):
         test(t"Fail to parse aa(bb){14,16ccddee"):
@@ -312,6 +311,50 @@ object Tests extends Suite(t"Kaleidoscope tests"):
         List(prefix, domain, tld)
 
       . assert(_ == List(t"test", t"example", t"com"))
+
+      suite(t"Character match tests"):
+        test(t"Match a character"):
+          t"hello" match
+            case r"h$vowel[aeiou]llo" => vowel
+
+        . assert(_ == 'e')
+
+        test(t"Match several characters"):
+          t"favourite" match
+            case r"fav$vowels[aeiou]+rite" => vowels
+
+        . assert(_ == List('o', 'u'))
+
+        test(t"Match zero characters"):
+          t"favourite" match
+            case r"favou$misc[cxm]*rite" => misc
+
+        . assert(_ == Nil)
+
+        test(t"Match maybe one character; preset"):
+          t"favourite" match
+            case r"favo$vowel[aeiou]?rite" => vowel
+
+        . assert(_ == 'u')
+
+        test(t"Match maybe one character; absent"):
+          t"favourite" match
+            case r"favou$vowel[aeiou]?rite" => vowel
+
+        . assert(_ == Unset)
+
+        test(t"Match characters in subgroup"):
+          t"favourite" match
+            case r"fav($vowels[ou]*)rite" => vowels
+
+        . assert(_ == List('o', 'u'))
+
+
+        test(t"Match characters in subgroup"):
+          t"favourite" match
+            case r"fav($vowels[ou]*)rite" => vowels.tap(println(_))
+
+        . assert(_ == List('o', 'u'))
 
     suite(t"Glob tests"):
       test(t"Parse a plain glob"):

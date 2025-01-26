@@ -58,24 +58,32 @@ object Regex:
     def unitary: Boolean = this == Exactly(1)
 
   case class Group
-     (start:     Int,
-      end:     Int,
+     (start:      Int,
+      end:        Int,
       outerEnd:   Int,
-      groups:    List[Group] = Nil,
+      groups:     List[Group] = Nil,
       quantifier: Quantifier  = Quantifier.Exactly(1),
-      greed:     Greed       = Greed.Greedy,
-      capture:    Boolean     = false):
+      greed:      Greed       = Greed.Greedy,
+      capture:    Boolean     = false,
+      charClass:  Boolean     = false):
 
     def outerStart: Int = (start - 1).max(0)
     def allGroups: List[Regex.Group] = groups.flatMap { group => group :: group.allGroups }
     def captureGroups: List[Regex.Group] = allGroups.filter(_.capture)
 
     def serialize(pattern: Text, index: Int): (Int, Text) =
-      val (index2, subpattern) = Regex.makePattern(pattern, groups, start, "".tt, end, index)
-      val groupName = (if capture then s"?<g$index>" else "").tt
+      if charClass then
+        val groupName = (if capture then s"?<g$index>" else "").tt
+        if quantifier.unitary then (index, s"($groupName[${pattern.s.substring(start, end)}])")
+        else
+          val chars = pattern.s.substring(start, end)
+          (index, s"($groupName[$chars]${quantifier.serialize}${greed.serialize})")
+      else
+        val (index2, subpattern) = Regex.makePattern(pattern, groups, start, "".tt, end, index)
+        val groupName = (if capture then s"?<g$index>" else "").tt
 
-      if quantifier.unitary then (index2, s"($groupName$subpattern)".tt)
-      else (index2, s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})".tt)
+        if quantifier.unitary then (index2, s"($groupName$subpattern)".tt)
+        else (index2, s"($groupName($subpattern)${quantifier.serialize}${greed.serialize})".tt)
 
   def make(parts: Seq[String])(using Unsafe): Regex =
     import strategies.throwUnsafely
@@ -86,7 +94,8 @@ object Regex:
   def parse(parts: List[Text]): Regex raises RegexError =
     parts.absolve match
       case head :: tail =>
-        if !tail.all(_.s.startsWith("(")) then abort(RegexError(0, ExpectedGroup))
+        if !tail.all { part => part.s.startsWith("(") || part.s.startsWith("[") }
+        then abort(RegexError(0, ExpectedGroup))
 
     def captures(todo: List[Text], last: Int, done: Set[Int]): Set[Int] = todo match
       case Nil          => done
@@ -158,7 +167,7 @@ object Regex:
         abort(RegexError(index, UnexpectedChar))
 
     def group
-       (start: Int, children: List[Group], top: Boolean, escape: Boolean, charClass: Optional[Int])
+       (start: Int, children: List[Group], top: Boolean, escape: Boolean, charClass: Boolean)
     :     Group =
 
       current() match
@@ -166,7 +175,7 @@ object Regex:
           if !top then abort(RegexError(index, UnclosedGroup))
 
           Group(start, index, (index + 1).min(text.s.length), children.reverse,
-              Quantifier.Exactly(1), Greed.Greedy, captured.has(start - 1))
+              Quantifier.Exactly(1), Greed.Greedy, captured.has(start - 1), false)
 
         case '\\' =>
           index += 1
@@ -176,22 +185,27 @@ object Regex:
           index += 1
           group(start, children, top, false, charClass)
 
-        case '[' =>
+        case '[' if !charClass =>
           index += 1
-          group(start, children, top, false, index - 1)
+          group(start, group(index, Nil, false, false, true) :: children, top, false, false)
 
-        case ']' =>
-          if index - 1 == charClass then abort(RegexError(index, EmptyCharClass))
+        case ']' if charClass =>
+          if index - 1 == start then abort(RegexError(index, EmptyCharClass))
           index += 1
-          group(start, children, top, false, Unset)
+          if top then abort(RegexError(index - 1, NotInGroup))
+          val end = index - 1
+          val quantifier2 = quantifier()
+          val greed2 = greed()
 
-        case char if charClass.present =>
+          Group(start, end, index, Nil, quantifier2, greed2, captured.has(start - 1), true)
+
+        case char if charClass =>
           index += 1
           group(start, children, top, false, charClass)
 
         case '(' =>
           index += 1
-          group(start, group(index, Nil, false, false, Unset) :: children, top, false, Unset)
+          group(start, group(index, Nil, false, false, false) :: children, top, false, false)
 
         case ')' =>
           index += 1
@@ -200,13 +214,21 @@ object Regex:
           val quantifier2 = quantifier()
           val greed2 = greed()
 
-          Group(start, end, index, children.reverse, quantifier2, greed2, captured.has(start - 1))
+          Group
+           (start,
+            end,
+            index,
+            children.reverse,
+            quantifier2,
+            greed2,
+            captured.has(start - 1),
+            false)
 
         case _ =>
           index += 1
           group(start, children, top, false, charClass)
 
-    val mainGroup = group(0, Nil, true, false, Unset)
+    val mainGroup = group(0, Nil, true, false, false)
 
     def check(groups: List[Group], canCapture: Boolean): Unit =
       groups.each: group =>
@@ -263,33 +285,45 @@ case class Regex(pattern: Text, groups: List[Regex.Group]):
   def matches(text: Text)(using Scanner): Boolean = !matchGroups(text).isEmpty
 
   def matchGroups(text: Text)(using scanner: Scanner)
-  :     Option[IArray[List[Text] | Optional[Text]]] =
+  :     Option[IArray[List[Text | Char] | Optional[Text | Char]]] =
 
     val matcher: jur.Matcher = javaPattern.matcher(text.s).nn
 
-    def recur(todo: List[Regex.Group], matches: List[Optional[Text] | List[Text]], index: Int)
-    :     List[Optional[Text] | List[Text]] =
+    def recur
+       (todo:    List[Regex.Group],
+        matches: List[Optional[Text | Char] | List[Text | Char]],
+        index:   Int)
+    :     List[Optional[Text | Char] | List[Text | Char]] =
 
       todo match
         case Nil =>
           matches
 
         case group :: tail =>
+          val matchedText = matcher.group(s"g$index").nn
           val matches2 =
             if group.capture then
-              if group.quantifier.unitary then matcher.group(s"g$index").nn.tt :: matches
+              if group.charClass then
+                if group.quantifier.unitary then matchedText.head :: matches
+                else if group.quantifier == Regex.Quantifier.Between(0, 1)
+                then matchedText.headOption.getOrElse(Unset) :: matches
+                else matchedText.toCharArray.nn.to(List) :: matches
               else
-                val matchedText = matcher.group(s"g$index").nn
-                val subpattern = pattern.s.substring(group.start, group.end).nn
-                val compiled = Regex.cache.computeIfAbsent(subpattern, jur.Pattern.compile(_)).nn
-                val submatcher = compiled.matcher(matchedText).nn
-                var submatches: List[Text] = Nil
 
-                while submatcher.find() do submatches ::= submatcher.toMatchResult.nn.group(0).nn.tt
+              if group.quantifier.unitary then matcher.group(s"g$index").nn.tt  :: matches
+              else
+                if group.charClass then matchedText.toCharArray.nn.to(List) :: matches else
+                  val subpattern = pattern.s.substring(group.start, group.end).nn
+                  val compiled = Regex.cache.computeIfAbsent(subpattern, jur.Pattern.compile(_)).nn
+                  val submatcher = compiled.matcher(matchedText).nn
+                  var submatches: List[Text] = Nil
 
-                if group.quantifier == Regex.Quantifier.Between(0, 1)
-                then submatches.prim :: matches
-                else submatches.reverse :: matches
+                  while submatcher.find()
+                  do submatches ::= submatcher.toMatchResult.nn.group(0).nn.tt
+
+                  if group.quantifier == Regex.Quantifier.Between(0, 1)
+                  then submatches.prim :: matches
+                  else submatches.reverse :: matches
 
             else matches
 

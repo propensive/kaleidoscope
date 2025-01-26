@@ -43,10 +43,14 @@ object Kaleidoscope:
 
     val regex = haltingly(Regex.parse(parts.map(Text(_))))
 
-    val types: List[TypeRepr] = regex.captureGroups.map(_.quantifier).map:
-      case Regex.Quantifier.Exactly(1)    => TypeRepr.of[Text]
-      case Regex.Quantifier.Between(0, 1) => TypeRepr.of[Optional[Text]]
-      case _                              => TypeRepr.of[List[Text]]
+    val types: List[TypeRepr] = regex.captureGroups.map: group =>
+      group.quantifier match
+        case Regex.Quantifier.Exactly(1)    => if group.charClass then TypeRepr.of[Char]
+                                               else TypeRepr.of[Text]
+        case Regex.Quantifier.Between(0, 1) => if group.charClass then TypeRepr.of[Optional[Char]]
+                                               else TypeRepr.of[Optional[Text]]
+        case _                              => if group.charClass then TypeRepr.of[List[Char]]
+                                               else TypeRepr.of[List[Text]]
 
     // This needs to be `lazy`
     lazy val tupleType: TypeRepr =
@@ -79,7 +83,7 @@ object Kaleidoscope:
   class RExtractor[ResultType](parts: Seq[String]):
     def unapply(scrutinee: Text)(using scanner: Scanner): ResultType =
       val result = Regex.make(parts)(using Unsafe).matchGroups(scrutinee)
-      val result2 = result.asInstanceOf[Option[IArray[List[Text] | Optional[Text]]]]
+      val result2 = result.asInstanceOf[Option[IArray[List[Text | Char] | Optional[Text | Char]]]]
 
       if parts.length == 2 then result2.map(_.head).asInstanceOf[ResultType]
       else result2.map(Tuple.fromIArray(_)).asInstanceOf[ResultType]
