@@ -19,5 +19,5 @@ package kaleidoscope
 import vacuous.*
 
 object Scanner:
-  given default: DummyImplicit => Scanner = Scanner(Unset)
+  given default: (erased DummyImplicit) => Scanner = Scanner(Unset)
 class Scanner(var nextStart: Optional[Int] = Unset)
